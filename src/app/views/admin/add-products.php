@@ -2,7 +2,13 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true || ($_SESSION["user_role"] ?? "") !== "admin") {
+
+// Kiểm tra quyền quản trị viên
+$isAuthorizedAdmin = isset($_SESSION["user_logged_in"]) 
+    && $_SESSION["user_logged_in"] === true 
+    && (($_SESSION["user_role"] ?? '') === 'admin');
+
+if (!$isAuthorizedAdmin) {
     header("Location: /index.php?page=login");
     exit();
 }
@@ -75,17 +81,19 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
                     <div class="user-profile d-flex align-items-center gap-3 pt-3 border-top">
                         <div class="avatar bg-gold text-white rounded-circle d-flex align-items-center justify-content-center fw-bold">
                             <?php 
-                            $words = explode(" ", $_SESSION["user_name"]);
-                            $initials = "";
-                            foreach ($words as $w) {
-                                $initials .= mb_substr($w, 0, 1, "UTF-8");
+                            $nameSegments = explode(" ", trim($_SESSION["user_name"] ?? "Admin"));
+                            $avatarLetters = "";
+                            foreach ($nameSegments as $segment) {
+                                if (!empty($segment)) {
+                                    $avatarLetters .= mb_substr($segment, 0, 1, "UTF-8");
+                                }
                             }
-                            echo htmlspecialchars(mb_strtoupper(mb_substr($initials, -2, 2, "UTF-8"), "UTF-8"));
+                            echo htmlspecialchars(mb_strtoupper(mb_substr($avatarLetters, -2, 2, "UTF-8"), "UTF-8"));
                             ?>
                         </div>
                         <div>
-                            <h6 class="mb-0 small fw-bold text-dark"><?php echo htmlspecialchars($_SESSION["user_name"]); ?></h6>
-                            <small class="text-muted font-xs"><?php echo htmlspecialchars(ucfirst($_SESSION["user_role"])); ?></small>
+                            <h6 class="mb-0 small fw-bold text-dark"><?= htmlspecialchars($_SESSION["user_name"] ?? "Quản trị viên") ?></h6>
+                            <small class="text-muted font-xs"><?= htmlspecialchars(ucfirst($_SESSION["user_role"] ?? "admin")) ?></small>
                         </div>
                     </div>
                 </div>
@@ -98,7 +106,7 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
                 <div class="d-flex justify-content-between align-items-center pt-3 pb-3 mb-4 border-bottom">
                     <div>
                         <h1 class="page-title mb-1">Thêm sản phẩm mới</h1>
-                        <p class="text-muted mb-0 small">Mở rộng bộ sưu tập của bạn.</p>
+                        <p class="text-muted mb-0 small">Mở rộng danh mục sản phẩm trang sức của bạn.</p>
                     </div>
                     <div class="d-flex align-items-center gap-3">
                         <a href="/index.php?page=admin_products" class="btn btn-outline-secondary border-color text-muted font-xs px-4 py-2 text-decoration-none">Hủy bỏ</a>
@@ -106,12 +114,14 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
                     </div>
                 </div>
 
-                <?php
-                if (isset($_SESSION["error_message"])) {
-                    echo '<div class="alert alert-danger">' . htmlspecialchars($_SESSION["error_message"]) . '</div>';
-                    unset($_SESSION["error_message"]);
-                }
-                ?>
+                <?php if (!empty($_SESSION["error_message"])): ?>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-circle me-1"></i>
+                        <?= htmlspecialchars($_SESSION["error_message"]) ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <?php unset($_SESSION["error_message"]); ?>
+                <?php endif; ?>
 
                 <div class="row g-4 mb-5">
                     
@@ -122,7 +132,7 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
                             
                             <div class="mb-4">
                                 <label class="form-label form-label-custom">TÊN SẢN PHẨM</label>
-                                <input type="text" name="name" class="form-control form-control-custom" placeholder="Ví dụ: Aurum Solitaire Necklace" required>
+                                <input type="text" name="name" class="form-control form-control-custom" placeholder="Ví dụ: Nhẫn Kim Cương Vàng Trắng Lumière" required>
                             </div>
                             
                             <div class="mb-3">
@@ -136,7 +146,7 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
                                         <button type="button" class="btn btn-sm btn-light border-0"><i class="bi bi-list-ul"></i></button>
                                         <button type="button" class="btn btn-sm btn-light border-0"><i class="bi bi-list-ol"></i></button>
                                     </div>
-                                    <textarea name="description" class="form-control border-0 shadow-none p-3 font-xs text-muted" rows="5" placeholder="Mô tả chi tiết về độ tinh xảo, chất liệu và nguồn cảm hứng của sản phẩm này..."></textarea>
+                                    <textarea name="description" class="form-control border-0 shadow-none p-3 font-xs text-muted" rows="5" placeholder="Mô tả chi tiết về độ tinh xảo, chất liệu, đá quý và nguồn cảm hứng thiết kế..."></textarea>
                                 </div>
                             </div>
                         </div>
@@ -151,7 +161,7 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
                                         <i class="bi bi-cloud-arrow-up fs-2 text-gold"></i>
                                     </div>
                                     <h6 class="mb-2 font-xs fw-bold">Chọn tệp tin hoặc kéo & thả hình ảnh vào đây</h6>
-                                    <p class="text-muted font-xs mb-3">Hình ảnh độ phân giải cao (JPEG hoặc PNG, tối đa 5MB)</p>
+                                    <p class="text-muted font-xs mb-3">Hỗ trợ ảnh JPG, PNG hoặc WEBP (tối đa 5MB)</p>
                                     <button type="button" class="btn btn-outline-secondary border-color btn-sm font-xs px-3">Chọn tệp tin</button>
                                 </div>
                             </div>
@@ -166,20 +176,20 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
                             <div class="mb-4">
                                 <label class="form-label form-label-custom">GIÁ BÁN (₫)</label>
                                 <div class="input-group">
-                                    <input type="number" name="price" class="form-control border-color shadow-none font-xs" placeholder="0" required>
+                                    <input type="number" name="price" min="0" step="1000" class="form-control border-color shadow-none font-xs" placeholder="0" required>
                                 </div>
                             </div>
 
                             <div class="mb-4">
                                 <label class="form-label form-label-custom">GIÁ KHUYẾN MÃI (₫ - TÙY CHỌN)</label>
                                 <div class="input-group">
-                                    <input type="number" name="sale_price" class="form-control border-color shadow-none font-xs" placeholder="0">
+                                    <input type="number" name="sale_price" min="0" step="1000" class="form-control border-color shadow-none font-xs" placeholder="0">
                                 </div>
                             </div>
                             
                             <div class="mb-2">
                                 <label class="form-label form-label-custom">SỐ LƯỢNG TỒN KHO</label>
-                                <input type="number" name="stock" class="form-control form-control-custom" placeholder="0" required>
+                                <input type="number" name="stock" min="0" class="form-control form-control-custom" placeholder="0" required>
                             </div>
                         </div>
 
@@ -190,9 +200,13 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
                                 <label class="form-label form-label-custom">DANH MỤC</label>
                                 <select name="category_id" class="form-select form-control-custom font-xs text-muted" required>
                                     <option value="" selected disabled>Chọn danh mục</option>
-                                    <?php foreach ($categories as $cat): ?>
-                                        <option value="<?php echo $cat['category_id']; ?>"><?php echo htmlspecialchars($cat['category_name']); ?></option>
-                                    <?php endforeach; ?>
+                                    <?php if (!empty($categories) && is_iterable($categories)): ?>
+                                        <?php foreach ($categories as $cat): ?>
+                                            <option value="<?= htmlspecialchars((string)($cat['category_id'] ?? '')) ?>">
+                                                <?= htmlspecialchars((string)($cat['category_name'] ?? 'Danh mục')) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
                                 </select>
                             </div>
                         </div>
@@ -214,44 +228,34 @@ document.addEventListener('DOMContentLoaded', function() {
     if (fileInput && dropZone && uploadContent) {
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
-            if (file) {
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        uploadContent.innerHTML = `
-                            <div class="position-relative d-inline-block py-2">
-                                <img src="${event.target.result}" class="img-fluid rounded shadow-sm mb-3" style="max-height: 180px; object-fit: contain;">
-                                <div class="font-xs fw-bold text-success">
-                                    <i class="bi bi-check-circle-fill me-1"></i> Đã chọn: ${file.name}
-                                </div>
-                                <small class="text-muted d-block mt-1 font-xs">(Nhấp hoặc kéo thả tệp mới để thay thế)</small>
-                            </div>
-                        `;
-                    };
-                    reader.readAsDataURL(file);
-                } else {
+            if (!file) return;
+
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
                     uploadContent.innerHTML = `
-                        <div class="upload-icon mb-3">
-                            <i class="bi bi-file-earmark-check fs-2 text-success"></i>
+                        <div class="position-relative d-inline-block py-2">
+                            <img src="${event.target.result}" class="img-fluid rounded shadow-sm mb-3" style="max-height: 180px; object-fit: contain;">
+                            <div class="font-xs fw-bold text-success">
+                                <i class="bi bi-check-circle-fill me-1"></i> Đã tải ảnh: ${file.name}
+                            </div>
+                            <small class="text-muted d-block mt-1 font-xs">(Bấm hoặc kéo thả ảnh khác để đổi)</small>
                         </div>
-                        <h6 class="mb-2 font-xs fw-bold text-success">Đã đính kèm tệp tin thành công!</h6>
-                        <p class="text-muted font-xs mb-3">${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)</p>
-                        <button type="button" class="btn btn-outline-secondary border-color btn-sm font-xs px-3">Chọn tệp tin khác</button>
                     `;
-                }
+                };
+                reader.readAsDataURL(file);
             } else {
                 uploadContent.innerHTML = `
                     <div class="upload-icon mb-3">
-                        <i class="bi bi-cloud-arrow-up fs-2 text-gold"></i>
+                        <i class="bi bi-file-earmark-check fs-2 text-success"></i>
                     </div>
-                    <h6 class="mb-2 font-xs fw-bold">Chọn tệp tin hoặc kéo & thả hình ảnh vào đây</h6>
-                    <p class="text-muted font-xs mb-3">Hình ảnh độ phân giải cao (JPEG hoặc PNG, tối đa 5MB)</p>
-                    <button type="button" class="btn btn-outline-secondary border-color btn-sm font-xs px-3">Chọn tệp tin</button>
+                    <h6 class="mb-2 font-xs fw-bold text-success">Đã chọn tệp tin thành công!</h6>
+                    <p class="text-muted font-xs mb-3">${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)</p>
+                    <button type="button" class="btn btn-outline-secondary border-color btn-sm font-xs px-3">Đổi tệp khác</button>
                 `;
             }
         });
 
-        // Drag & Drop visual effects
         dropZone.addEventListener('dragover', function(e) {
             e.preventDefault();
             dropZone.style.borderColor = '#c5a880';

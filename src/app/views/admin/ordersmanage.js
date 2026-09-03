@@ -1,158 +1,164 @@
-document.addEventListener("DOMContentLoaded", function () {
-    // Khai báo các phần tử DOM quan trọng
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. Tham chiếu các thành phần DOM
     const searchInput = document.getElementById("searchOrders");
-    const filterPayment = document.getElementById("filterPayment");
-    const filterFulfillment = document.getElementById("filterFulfillment");
-    const btnApplyFilters = document.getElementById("btnApplyFilters");
+    const paymentFilter = document.getElementById("filterPayment");
+    const fulfillmentFilter = document.getElementById("filterFulfillment");
+    const applyFilterBtn = document.getElementById("btnApplyFilters");
     const selectAllCheckbox = document.getElementById("selectAll");
     const tableRows = document.querySelectorAll("#ordersTable tbody tr");
 
-    // Khởi tạo Bootstrap Modal đối với mục Thay đổi trạng thái
-    const updateModalEl = document.getElementById("updateStatusModal");
-    let updateModal = null;
-    
-    if (updateModalEl) {
-        updateModal = new bootstrap.Modal(updateModalEl);
-    }
-    
-    const modalOrderIdText = document.getElementById("modalOrderId");
-    const modalSelectPayment = document.getElementById("modalSelectPayment");
-    const modalSelectFulfillment = document.getElementById("modalSelectFulfillment");
-    const btnSaveStatus = document.getElementById("btnSaveStatus");
+    // Modal bootstrap cập nhật trạng thái
+    const modalEl = document.getElementById("updateStatusModal");
+    const updateModalInstance = modalEl ? new bootstrap.Modal(modalEl) : null;
+    const modalHeading = document.getElementById("modalOrderId");
+    const modalPaymentSelect = document.getElementById("modalSelectPayment");
+    const modalFulfillmentSelect = document.getElementById("modalSelectFulfillment");
+    const saveStatusBtn = document.getElementById("btnSaveStatus");
 
-    let currentRowTarget = null; // Biến tạm lưu trữ dòng đang chọn chỉnh sửa
+    let targetedOrderRow = null;
+
+    // Từ điển trạng thái hiển thị
+    const STATUS_MAP = {
+        pending:          { css: "status-pending",    label: "Chờ xử lý" },
+        processing:       { css: "status-processing", label: "Đang xử lý" },
+        shipping:         { css: "status-processing", label: "Đang giao" },
+        delivered:        { css: "status-shipped",    label: "Đã giao" },
+        cancelled:        { css: "status-cancelled",  label: "Đã hủy" },
+        return_requested: { css: "status-pending",    label: "Yêu cầu hoàn trả (Đang thu hồi)" },
+        returned:         { css: "status-returned",   label: "Đã hoàn trả thành công" }
+    };
+
+    const PAYMENT_MAP = {
+        cod:           `<i class="bi bi-cash status-paid me-1"></i> COD`,
+        bank_transfer: `<i class="bi bi-credit-card status-pending me-1"></i> Chuyển khoản`
+    };
 
     // ==========================================
-    // 1. TÌM KIẾM VÀ BỘ LỌC ĐƠN HÀNG (FILTERS)
+    // 2. BỘ LỌC VÀ TÌM KIẾM ĐƠN HÀNG
     // ==========================================
-    function filterOrders() {
+    const executeFilter = () => {
         if (!searchInput) return;
-        
-        const searchText = searchInput.value.toLowerCase().trim();
-        const paymentValue = filterPayment ? filterPayment.value : "all";
-        const fulfillmentValue = filterFulfillment ? filterFulfillment.value : "all";
+
+        const term = searchInput.value.toLowerCase().trim();
+        const selectedPayment = paymentFilter?.value ?? "all";
+        const selectedFulfillment = fulfillmentFilter?.value ?? "all";
 
         tableRows.forEach(row => {
-            const orderId = (row.getAttribute("data-id") || "").toLowerCase();
-            const customerName = (row.getAttribute("data-customer") || "").toLowerCase();
-            const rowPayment = row.getAttribute("data-payment");
-            const rowFulfillment = row.getAttribute("data-fulfillment");
+            const code = (row.getAttribute("data-id") || "").toLowerCase();
+            const customer = (row.getAttribute("data-customer") || "").toLowerCase();
+            const rowPay = row.getAttribute("data-payment") || "";
+            const rowFulfill = row.getAttribute("data-fulfillment") || "";
 
-            // Kiểm tra điều kiện Tìm kiếm (Khớp mã ID hoặc Tên khách hàng)
-            const matchesSearch = orderId.includes(searchText) || customerName.includes(searchText);
-            
-            // Kiểm tra điều kiện Trạng thái thanh toán
-            const matchesPayment = (paymentValue === "all") || (rowPayment === paymentValue);
-            
-            // Kiểm tra điều kiện Trạng thái vận chuyển
-            const matchesFulfillment = (fulfillmentValue === "all") || (rowFulfillment === fulfillmentValue);
+            const isMatchedQuery = !term || code.includes(term) || customer.includes(term);
+            const isMatchedPayment = selectedPayment === "all" || rowPay === selectedPayment;
+            const isMatchedFulfillment = selectedFulfillment === "all" || rowFulfill === selectedFulfillment;
 
-            // Hiển thị hoặc ẩn dòng dựa vào tập hợp điều kiện
-            if (matchesSearch && matchesPayment && matchesFulfillment) {
-                row.style.setProperty("display", "", "important");
+            if (isMatchedQuery && isMatchedPayment && isMatchedFulfillment) {
+                row.style.removeProperty("display");
             } else {
                 row.style.setProperty("display", "none", "important");
-                // Hủy check nếu hàng đó bị ẩn đi bởi bộ lọc
-                const rowCb = row.querySelector(".form-check-input");
-                if (rowCb) rowCb.checked = false;
+                const rowBox = row.querySelector(".form-check-input");
+                if (rowBox) rowBox.checked = false;
             }
         });
-        
-        // Cập nhật lại trạng thái nút Select All tổng sau khi lọc
+
         if (selectAllCheckbox) selectAllCheckbox.checked = false;
-    }
+    };
 
-    // Sự kiện lắng nghe khi click nút "Apply Filters"
-    if (btnApplyFilters) {
-        btnApplyFilters.addEventListener("click", filterOrders);
-    }
-
-    // Hỗ trợ tìm kiếm nhanh thời gian thực khi đang gõ chữ
-    if (searchInput) {
-        searchInput.addEventListener("input", filterOrders);
-    }
-
-
-    // ==========================================
-    // 2. XỬ LÝ SỰ KIỆN CẬP NHẬT TRẠNG THÁI (UPDATE STATUS)
-    // ==========================================
-    tableRows.forEach(row => {
-        const updateBtn = row.querySelector(".btn-update-status");
-        if (updateBtn) {
-            updateBtn.addEventListener("click", function () {
-                if (!updateModal) return;
-                
-                currentRowTarget = row; // Gán hàng hiện tại vào biến mục tiêu
-                
-                const orderId = row.getAttribute("data-id");
-                const currentPayment = row.getAttribute("data-payment");
-                const currentFulfillment = row.getAttribute("data-fulfillment");
-
-                // Điền thông tin cũ vào Modal trước khi hiển thị
-                if (modalOrderIdText) modalOrderIdText.textContent = `Update Order ${orderId}`;
-                if (modalSelectPayment) modalSelectPayment.value = currentPayment;
-                if (modalSelectFulfillment) modalSelectFulfillment.value = currentFulfillment;
-
-                // Mở Modal
-                updateModal.show();
-            });
-        }
+    // Debounce tìm kiếm mượt mà
+    let debounceTimer = null;
+    searchInput?.addEventListener("input", () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(executeFilter, 250);
     });
 
-    // Xử lý sự kiện lưu dữ liệu từ Modal
-    if (btnSaveStatus) {
-        btnSaveStatus.addEventListener("click", function () {
-            if (!currentRowTarget || !updateModal) return;
-
-            const newPayment = modalSelectPayment.value;
-            const newFulfillment = modalSelectFulfillment.value;
-
-            // Cập nhật lại các thuộc tính data-* trên thẻ tr
-            currentRowTarget.setAttribute("data-payment", newPayment);
-            currentRowTarget.setAttribute("data-fulfillment", newFulfillment);
-
-            // Tối ưu nâng cao: Tìm phần tử chứa badge thay vì gán cứng index cells tránh lỗi giao diện
-            const paymentCell = currentRowTarget.querySelector(".status-payment-container") || currentRowTarget.cells[5];
-            const fulfillmentCell = currentRowTarget.querySelector(".status-fulfillment-container") || currentRowTarget.cells[6];
-
-            // Cập nhật giao diện cột "Payment Status"
-            if (paymentCell) {
-                if (newPayment === "Paid") {
-                    paymentCell.innerHTML = `<span class="status-badge"><i class="bi bi-circle-fill font-xs status-paid me-1"></i> Paid</span>`;
-                } else {
-                    paymentCell.innerHTML = `<span class="status-badge"><i class="bi bi-circle-fill font-xs status-pending me-1"></i> Pending</span>`;
-                }
-            }
-
-            // Cập nhật giao diện cột "Fulfillment Status"
-            if (fulfillmentCell) {
-                if (newFulfillment === "Shipped") {
-                    fulfillmentCell.innerHTML = `<span class="status-badge"><i class="bi bi-circle-fill font-xs status-shipped me-1"></i> Shipped</span>`;
-                } else {
-                    fulfillmentCell.innerHTML = `<span class="status-badge"><i class="bi bi-circle-fill font-xs status-processing me-1"></i> Processing</span>`;
-                }
-            }
-
-            // Đóng modal sau khi hoàn tất thành công
-            updateModal.hide();
-            
-            // Chạy lại bộ lọc tự động để cập nhật trạng thái hiển thị chuẩn xác nhất
-            filterOrders();
-        });
-    }
+    applyFilterBtn?.addEventListener("click", executeFilter);
+    paymentFilter?.addEventListener("change", executeFilter);
+    fulfillmentFilter?.addEventListener("change", executeFilter);
 
     // ==========================================
-    // 3. TÍNH NĂNG CHỌN TẤT CẢ (SELECT ALL CHECKBOX)
+    // 3. XỬ LÝ SỰ KIỆN CẬP NHẬT TRẠNG THÁI
+    // ==========================================
+    tableRows.forEach(row => {
+        const triggerBtn = row.querySelector(".btn-update-status");
+        if (!triggerBtn) return;
+
+        triggerBtn.addEventListener("click", () => {
+            if (!updateModalInstance) return;
+
+            targetedOrderRow = row;
+            const orderCode = row.getAttribute("data-id") || "";
+            const currentPayment = row.getAttribute("data-payment") || "cod";
+            const currentStatus = row.getAttribute("data-fulfillment") || "pending";
+
+            if (modalHeading) modalHeading.textContent = `Đơn hàng #${orderCode}`;
+            if (modalPaymentSelect) modalPaymentSelect.value = currentPayment;
+            if (modalFulfillmentSelect) modalFulfillmentSelect.value = currentStatus;
+
+            updateModalInstance.show();
+        });
+    });
+
+    saveStatusBtn?.addEventListener("click", () => {
+        if (!targetedOrderRow || !updateModalInstance) return;
+
+        const updatedPayment = modalPaymentSelect?.value || "cod";
+        const updatedStatus = modalFulfillmentSelect?.value || "pending";
+
+        // Cập nhật thuộc tính data-*
+        targetedOrderRow.setAttribute("data-payment", updatedPayment);
+        targetedOrderRow.setAttribute("data-fulfillment", updatedStatus);
+
+        // Cập nhật HTML trực tiếp trên các cell
+        const paymentCell = targetedOrderRow.cells[5];
+        const statusCell = targetedOrderRow.cells[6];
+
+        if (paymentCell) {
+            paymentCell.innerHTML = `
+                <span class="status-badge">
+                    ${PAYMENT_MAP[updatedPayment] || updatedPayment}
+                </span>
+            `;
+        }
+
+        if (statusCell) {
+            const statusConfig = STATUS_MAP[updatedStatus] || { css: "status-pending", label: updatedStatus };
+            statusCell.innerHTML = `
+                <span class="status-badge">
+                    <i class="bi bi-circle-fill font-xs ${statusConfig.css} me-1"></i> 
+                    ${statusConfig.label}
+                </span>
+            `;
+        }
+
+        updateModalInstance.hide();
+        executeFilter();
+    });
+
+    // ==========================================
+    // 4. CHECKBOX "CHỌN TẤT CẢ" (SELECT ALL)
     // ==========================================
     if (selectAllCheckbox) {
-        selectAllCheckbox.addEventListener("change", function () {
-            const checkboxes = document.querySelectorAll("#ordersTable tbody .form-check-input");
-            checkboxes.forEach(cb => {
-                // Chỉ check các hàng đang được hiển thị thực tế (không bị ẩn bởi bộ lọc tìm kiếm)
-                const parentRow = cb.closest("tr");
-                if (parentRow && parentRow.style.display !== "none") {
-                    cb.checked = selectAllCheckbox.checked;
+        selectAllCheckbox.addEventListener("change", () => {
+            const isChecked = selectAllCheckbox.checked;
+            document.querySelectorAll("#ordersTable tbody .form-check-input").forEach(cb => {
+                const tr = cb.closest("tr");
+                if (tr && tr.style.display !== "none") {
+                    cb.checked = isChecked;
                 }
+            });
+        });
+
+        // Bỏ check "Select All" nếu người dùng hủy chọn bất kỳ dòng nào
+        document.querySelectorAll("#ordersTable tbody .form-check-input").forEach(cb => {
+            cb.addEventListener("change", () => {
+                const visibleBoxes = Array.from(document.querySelectorAll("#ordersTable tbody tr"))
+                    .filter(tr => tr.style.display !== "none")
+                    .map(tr => tr.querySelector(".form-check-input"))
+                    .filter(Boolean);
+
+                const allChecked = visibleBoxes.length > 0 && visibleBoxes.every(box => box.checked);
+                selectAllCheckbox.checked = allChecked;
             });
         });
     }

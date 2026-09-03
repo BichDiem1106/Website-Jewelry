@@ -2,7 +2,12 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true || ($_SESSION["user_role"] ?? "") !== "admin") {
+
+$isAdminAuthorized = isset($_SESSION["user_logged_in"], $_SESSION["user_role"]) 
+    && $_SESSION["user_logged_in"] === true 
+    && strtolower((string)$_SESSION["user_role"]) === "admin";
+
+if (!$isAdminAuthorized) {
     header("Location: /index.php?page=login");
     exit();
 }
@@ -15,19 +20,18 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
     <title>LUMIÈRE Fine Jewelry - Quản lý danh mục</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
-    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="icon" type="image/png" href="/favicon.png" />
-    
     <link rel="stylesheet" href="/assets/admin/style.css">
+
     <style>
         .table-custom {
-            background: white;
+            background: #ffffff;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 4px 18px rgba(0,0,0,0.02);
-            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.02);
+            border: 1px solid var(--border-color, #e5e7eb);
         }
         .table-custom th {
             background-color: #faf6f0;
@@ -50,7 +54,7 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
             z-index: 9999;
         }
         .badge-show {
-            background-color: rgba(79, 122, 82, 0.1);
+            background-color: rgba(79, 122, 82, 0.12);
             color: #4f7a52;
             font-weight: 500;
             padding: 5px 12px;
@@ -58,7 +62,7 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
             font-size: 12px;
         }
         .badge-hide {
-            background-color: rgba(179, 64, 58, 0.1);
+            background-color: rgba(179, 64, 58, 0.12);
             color: #b3403a;
             font-weight: 500;
             padding: 5px 12px;
@@ -72,10 +76,8 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
 <div class="container-fluid">
     <div class="row min-vh-100">
         
-        <!-- SIDEBAR -->
         <!-- Sidebar Navigation -->
         <nav class="col-md-3 col-lg-2 sidebar border-end p-4">
-            <!-- Mobile Header with Hamburger Trigger -->
             <div class="d-flex justify-content-between align-items-center d-md-none mb-2">
                 <a href="/index.php?page=admin_dashboard" class="text-decoration-none"><h3 class="brand-logo mb-0">LUMIÈRE</h3></a>
                 <button class="btn btn-link text-dark p-0 border-0" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
@@ -83,7 +85,6 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
                 </button>
             </div>
             
-            <!-- Collapsible Sidebar Content -->
             <div class="collapse d-md-block" id="sidebarMenu">
                 <div class="position-sticky d-flex flex-column h-100 justify-content-between">
                     <div>
@@ -117,23 +118,24 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
                             <li class="nav-item">
                                 <a class="nav-link text-danger" href="/index.php?page=logout"><i class="bi bi-box-arrow-right me-2"></i> Đăng xuất</a>
                             </li>
-                        </ul>         
+                        </ul>        
                     </div>
                     
                     <div class="user-profile d-flex align-items-center gap-3 pt-3 border-top">
                         <div class="avatar bg-gold text-white rounded-circle d-flex align-items-center justify-content-center fw-bold">
                             <?php 
-                            $words = explode(" ", $_SESSION["user_name"]);
+                            $rawName = trim($_SESSION["user_name"] ?? "Admin");
+                            $parts = array_filter(explode(" ", $rawName));
                             $initials = "";
-                            foreach ($words as $w) {
-                                $initials .= mb_substr($w, 0, 1, "UTF-8");
+                            foreach ($parts as $p) {
+                                $initials .= mb_substr($p, 0, 1, "UTF-8");
                             }
                             echo htmlspecialchars(mb_strtoupper(mb_substr($initials, -2, 2, "UTF-8"), "UTF-8"));
                             ?>
                         </div>
                         <div>
-                            <h6 class="mb-0 small fw-bold text-dark"><?php echo htmlspecialchars($_SESSION["user_name"]); ?></h6>
-                            <small class="text-muted font-xs"><?php echo htmlspecialchars(ucfirst($_SESSION["user_role"])); ?></small>
+                            <h6 class="mb-0 small fw-bold text-dark"><?= htmlspecialchars($_SESSION["user_name"] ?? "Quản trị viên") ?></h6>
+                            <small class="text-muted font-xs"><?= htmlspecialchars(ucfirst($_SESSION["user_role"] ?? "admin")) ?></small>
                         </div>
                     </div>
                 </div>
@@ -146,10 +148,10 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-end border-bottom pb-4 mb-5 gap-3">
                 <div>
                     <h1 class="page-title display-6 mb-2">Quản lý danh mục</h1>
-                    <p class="text-muted mb-0">Quản lý các danh mục sản phẩm thời trang cao cấp của LUMIÈRE Fine Jewelry.</p>
+                    <p class="text-muted mb-0">Thiết lập và phân loại các dòng bộ sưu tập trang sức cao cấp LUMIÈRE.</p>
                 </div>
                 <div>
-                    <button class="btn btn-gold text-nowrap py-2 px-4" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                    <button class="btn btn-gold text-nowrap py-2 px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
                         <i class="bi bi-plus-lg me-2"></i> THÊM DANH MỤC MỚI
                     </button>
                 </div>
@@ -171,33 +173,40 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
                     <tbody>
                         <?php if (empty($categories)): ?>
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-4">Chưa có danh mục nào.</td>
+                                <td colspan="6" class="text-center text-muted py-5">
+                                    <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                                    Chưa có danh mục nào được khởi tạo.
+                                </td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($categories as $cat): ?>
                                 <tr>
-                                    <td class="fw-semibold">#<?php echo $cat["category_id"]; ?></td>
-                                    <td class="fw-semibold text-dark"><?php echo htmlspecialchars($cat["category_name"]); ?></td>
-                                    <td class="text-muted text-truncate" style="max-width: 300px;"><?php echo htmlspecialchars($cat["description"] ?? "Chưa có mô tả"); ?></td>
+                                    <td class="fw-semibold">#<?= htmlspecialchars((string)$cat["category_id"]) ?></td>
+                                    <td class="fw-semibold text-dark"><?= htmlspecialchars($cat["category_name"]) ?></td>
+                                    <td class="text-muted text-truncate" style="max-width: 300px;">
+                                        <?= htmlspecialchars(!empty($cat["description"]) ? $cat["description"] : "Chưa có mô tả") ?>
+                                    </td>
                                     <td>
-                                        <?php if ($cat["status"] === "show"): ?>
+                                        <?php if (($cat["status"] ?? "") === "show"): ?>
                                             <span class="badge-show"><i class="bi bi-eye-fill me-1"></i> Hiển thị</span>
                                         <?php else: ?>
                                             <span class="badge-hide"><i class="bi bi-eye-slash-fill me-1"></i> Đang ẩn</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td class="text-muted small"><?php echo date("d/m/Y H:i", strtotime($cat["created_at"])); ?></td>
+                                    <td class="text-muted small">
+                                        <?= !empty($cat["created_at"]) ? (new DateTime($cat["created_at"]))->format("d/m/Y H:i") : "—" ?>
+                                    </td>
                                     <td style="text-align: center;">
                                         <div class="d-flex justify-content-center gap-2">
                                             <button class="btn btn-sm btn-outline-secondary px-3 btn-edit-cat" 
-                                                    data-id="<?php echo $cat["category_id"]; ?>"
-                                                    data-name="<?php echo htmlspecialchars($cat["category_name"]); ?>"
-                                                    data-desc="<?php echo htmlspecialchars($cat["description"] ?? ""); ?>"
-                                                    data-status="<?php echo $cat["status"]; ?>">
+                                                    data-id="<?= htmlspecialchars((string)$cat["category_id"]) ?>"
+                                                    data-name="<?= htmlspecialchars($cat["category_name"]) ?>"
+                                                    data-desc="<?= htmlspecialchars($cat["description"] ?? "") ?>"
+                                                    data-status="<?= htmlspecialchars($cat["status"] ?? "show") ?>">
                                                 <i class="bi bi-pencil-square"></i> Sửa
                                             </button>
                                             <button class="btn btn-sm btn-outline-danger px-3 btn-delete-cat" 
-                                                    data-id="<?php echo $cat["category_id"]; ?>">
+                                                    data-id="<?= htmlspecialchars((string)$cat["category_id"]) ?>">
                                                 <i class="bi bi-trash"></i> Xóa
                                             </button>
                                         </div>
@@ -299,7 +308,7 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Hàm hiển thị Toast
+    // Quản lý hiển thị Toast
     function showToast(message, type = "success") {
         const toastEl = document.getElementById('liveToast');
         const toastMessage = document.getElementById('toastMessage');
@@ -323,97 +332,55 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
         toast.show();
     }
 
-    // 1. Gắn sự kiện sửa danh mục
+    // Hàm gọi API async tái sử dụng
+    async function handleCategoryAction(url, formData) {
+        try {
+            const res = await fetch(url, { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.status === 'ok') {
+                showToast(data.message, 'success');
+                setTimeout(() => location.reload(), 1200);
+            } else {
+                showToast(data.message || 'Thao tác không thành công.', 'error');
+            }
+        } catch (err) {
+            console.error(err);
+            showToast('Lỗi kết nối máy chủ.', 'error');
+        }
+    }
+
+    // Gắn sự kiện modal Sửa
     document.querySelectorAll('.btn-edit-cat').forEach(btn => {
         btn.addEventListener('click', function() {
-            const id = this.getAttribute('data-id');
-            const name = this.getAttribute('data-name');
-            const desc = this.getAttribute('data-desc');
-            const status = this.getAttribute('data-status');
+            document.getElementById('edit_cat_id').value = this.dataset.id || '';
+            document.getElementById('edit_cat_name').value = this.dataset.name || '';
+            document.getElementById('edit_cat_desc').value = this.dataset.desc || '';
+            document.getElementById('edit_cat_status').value = this.dataset.status || 'show';
             
-            document.getElementById('edit_cat_id').value = id;
-            document.getElementById('edit_cat_name').value = name;
-            document.getElementById('edit_cat_desc').value = desc;
-            document.getElementById('edit_cat_status').value = status;
-            
-            const editModal = new bootstrap.Modal(document.getElementById('editCategoryModal'));
-            editModal.show();
+            new bootstrap.Modal(document.getElementById('editCategoryModal')).show();
         });
     });
 
-    // 2. Gửi form thêm danh mục qua AJAX
-    document.getElementById('addCategoryForm').addEventListener('submit', function(e) {
+    // Thêm mới
+    document.getElementById('addCategoryForm')?.addEventListener('submit', function(e) {
         e.preventDefault();
-        const formData = new FormData(this);
-        
-        fetch('/index.php?page=admin_api_add_category', {
-            method: 'POST',
-            body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === 'ok') {
-                showToast(data.message, 'success');
-                setTimeout(() => location.reload(), 1500);
-            } else {
-                showToast(data.message, 'error');
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            showToast('Lỗi kết nối máy chủ.', 'error');
-        });
+        handleCategoryAction('/index.php?page=admin_api_add_category', new FormData(this));
     });
 
-    // 3. Gửi form sửa danh mục qua AJAX
-    document.getElementById('editCategoryForm').addEventListener('submit', function(e) {
+    // Sửa
+    document.getElementById('editCategoryForm')?.addEventListener('submit', function(e) {
         e.preventDefault();
-        const formData = new FormData(this);
-        
-        fetch('/index.php?page=admin_api_edit_category', {
-            method: 'POST',
-            body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === 'ok') {
-                showToast(data.message, 'success');
-                setTimeout(() => location.reload(), 1500);
-            } else {
-                showToast(data.message, 'error');
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            showToast('Lỗi kết nối máy chủ.', 'error');
-        });
+        handleCategoryAction('/index.php?page=admin_api_edit_category', new FormData(this));
     });
 
-    // 4. Xóa danh mục qua AJAX
+    // Xóa
     document.querySelectorAll('.btn-delete-cat').forEach(btn => {
         btn.addEventListener('click', function() {
-            const id = this.getAttribute('data-id');
-            if (confirm('Bạn có chắc chắn muốn xóa danh mục này? Điều này có thể ảnh hưởng đến hiển thị sản phẩm.')) {
+            const id = this.dataset.id;
+            if (confirm('Bạn có chắc chắn muốn xóa danh mục này? Thao tác có thể ảnh hưởng đến sản phẩm liên kết.')) {
                 const formData = new FormData();
                 formData.append('category_id', id);
-                
-                fetch('/index.php?page=admin_api_delete_category', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.status === 'ok') {
-                        showToast(data.message, 'success');
-                        setTimeout(() => location.reload(), 1500);
-                    } else {
-                        showToast(data.message, 'error');
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    showToast('Lỗi kết nối máy chủ.', 'error');
-                });
+                handleCategoryAction('/index.php?page=admin_api_delete_category', formData);
             }
         });
     });
