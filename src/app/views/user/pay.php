@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thanh Toán — LUMIÈRE</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/pay.css" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+</head>
+<body>
+
+  <header id="siteHeader">
+    <div id="headerInner">
+      <a href="/index.php?page=home" id="logoLink" class="site-logo">LUMIÈRE</a>
+      <a href="/index.php?page=gio_hang" id="backToCartLink" class="back-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Thanh toán an toàn
+      </a>
+    </div>
+  </header>
+
+  <main id="checkoutPage">
+
+    <div id="checkoutHeading">
+      <h1 class="page-title">Thanh toán</h1>
+      <p class="page-subtitle">Hoàn tất đơn hàng của bạn.</p>
+    </div>
+
+    <form id="checkoutForm" novalidate>
+      <div id="checkoutGrid">
+
+        <div id="checkoutLeft">
+
+          <section class="checkout-section">
+            <h2 class="section-title">Địa chỉ nhận hàng</h2>
+
+            <div class="form-row">
+              <div class="form-field">
+                <label for="fullName">Họ và tên</label>
+                <input type="text" id="fullName" name="fullName" placeholder="Nguyễn Văn A" value="<?php echo htmlspecialchars($user['full_name'] ?? ''); ?>" required />
+              </div>
+              <div class="form-field">
+                <label for="phone">Số điện thoại</label>
+                <input type="tel" id="phone" name="phone" placeholder="0912 345 678" value="<?php echo htmlspecialchars($user['phone'] ?? ''); ?>" required />
+              </div>
+            </div>
+
+            <div class="form-row form-row--triple">
+              <div class="form-field">
+                <label for="province">Tỉnh / Thành phố</label>
+                <select id="province" name="province" required>
+                  <option value="" selected disabled>Chọn Tỉnh/Thành</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label for="district">Quận / Huyện</label>
+                <select id="district" name="district" required disabled>
+                  <option value="" selected disabled>Chọn Quận/Huyện</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label for="ward">Phường / Xã</label>
+                <select id="ward" name="ward" required disabled>
+                  <option value="" selected disabled>Chọn Phường/Xã</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-field form-field--full">
+                <label for="addressDetail">Địa chỉ cụ thể</label>
+                <input type="text" id="addressDetail" name="addressDetail" placeholder="Số nhà, tên đường, tòa nhà..." value="<?php echo htmlspecialchars($user['specific_address'] ?? ''); ?>" required />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-field form-field--full">
+                <label for="orderNote">Ghi chú đơn hàng <span class="label-optional">(Tùy chọn)</span></label>
+                <textarea id="orderNote" name="orderNote" rows="3" placeholder="Giao hàng vào giờ hành chính, gọi trước..."></textarea>
+              </div>
+            </div>
+          </section>
+
+          <section class="checkout-section">
+            <h2 class="section-title">Phương thức thanh toán</h2>
+
+            <div id="paymentMethods">
+              <label class="payment-option payment-option--active">
+                <input type="radio" name="paymentMethod" value="cod" checked />
+                <span class="payment-radio"></span>
+                <span class="payment-info">
+                  <span class="payment-name">Thanh toán khi nhận hàng (COD)</span>
+                  <span class="payment-desc">Thanh toán bằng tiền mặt khi giao hàng.</span>
+                </span>
+                <svg class="payment-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="6" width="22" height="13" rx="2"/><path d="M1 11h22M5 16h4"/></svg>
+              </label>
+
+              <label class="payment-option">
+                <input type="radio" name="paymentMethod" value="bank_transfer" />
+                <span class="payment-radio"></span>
+                <span class="payment-info">
+                  <span class="payment-name">Chuyển khoản ngân hàng</span>
+                  <span class="payment-desc">Chuyển khoản theo thông tin tài khoản của shop.</span>
+                </span>
+                <svg class="payment-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 21h18M5 21V9l7-5 7 5v12M9 21v-6h6v6"/></svg>
+              </label>
+
+              <label class="payment-option">
+                <input type="radio" name="paymentMethod" value="ewallet" />
+                <span class="payment-radio"></span>
+                <span class="payment-info">
+                  <span class="payment-name">Ví điện tử MoMo / ZaloPay</span>
+                  <span class="payment-desc">Quét mã QR để thanh toán nhanh chóng.</span>
+                </span>
+                <svg class="payment-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM20 14h1v1h-1zM14 20h1v1h-1zM17 17h1v1h-1zM20 18v3h-3"/></svg>
+              </label>
+            </div>
+
+            <div id="bankTransferInfo" class="payment-extra-info">
+              <p><strong>Ngân hàng:</strong> Vietcombank — Chi nhánh TP.HCM</p>
+              <p><strong>Số tài khoản:</strong> 0071000123456</p>
+              <p><strong>Chủ tài khoản:</strong> CÔNG TY TNHH LUMIÈRE</p>
+              <p><strong>Nội dung CK:</strong> <span id="transferNoteCode">LUMIÈRE [Họ tên] [SĐT]</span></p>
+            </div>
+
+            <div id="ewalletInfo" class="payment-extra-info">
+              <p>Mã QR thanh toán sẽ được hiển thị ở bước xác nhận tiếp theo sau khi bạn nhấn "Đặt hàng".</p>
+            </div>
+          </section>
+
+        </div>
+
+        <aside id="checkoutRight">
+          <div id="orderSummaryCard">
+            <h2 class="section-title">Đơn hàng của bạn</h2>
+
+            <div id="orderItemsList">
+              </div>
+
+            <div id="voucherRow">
+              <label id="voucherCheckLabel">
+                <input type="checkbox" id="voucherCheckbox" />
+                Mã giảm giá / Voucher
+              </label>
+              <div id="voucherInputRow">
+                <input type="text" id="voucherInput" placeholder="Nhập mã giảm giá" />
+                <button type="button" id="btnApplyVoucher" class="btn-secondary btn-voucher">Áp dụng</button>
+              </div>
+              <p id="voucherMessage" class="voucher-message"></p>
+            </div>
+
+            <div id="orderTotals">
+              <div class="totals-row">
+                <span>Tổng tiền hàng</span>
+                <span id="totalsSubtotal">0₫</span>
+              </div>
+              <div class="totals-row">
+                <span>Phí vận chuyển (Đã bảo hiểm)</span>
+                <span id="totalsShipping">Miễn phí</span>
+              </div>
+              <div class="totals-row" id="totalsDiscountRow">
+                <span>Giảm giá</span>
+                <span id="totalsDiscount">-0₫</span>
+              </div>
+            </div>
+
+            <div id="grandTotalRow">
+              <span>Tổng thanh toán</span>
+              <span id="grandTotalAmount">0₫</span>
+            </div>
+
+            <button type="submit" id="btnPlaceOrder" class="btn-primary btn-place-order">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              ĐẶT HÀNG
+            </button>
+
+            <p class="secure-note">Bằng việc đặt hàng, bạn đồng ý với Điều khoản dịch vụ và Chính sách bảo mật của LUMIÈRE.</p>
+          </div>
+        </aside>
+
+      </div>
+    </form>
+  </main>
+
+  <footer id="siteFooter">
+    <div id="footerLeft">
+      <p class="footer-logo">LUMIÈRE</p>
+    </div>
+    <p class="footer-copy">&copy; 2026 LUMIÈRE. Bản quyền thuộc về Nhóm 6.</p>
+  </footer>
+
+  <!-- ================= PAYMENT QR MODAL ================= -->
+  <div class="modal fade" id="paymentQrModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true" style="font-family: 'Inter', sans-serif;">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+      <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; background: #fff;">
+        <div class="modal-header border-0 pb-0" style="position: relative; display: block; border-bottom: none;">
+          <h5 class="modal-title w-100 text-center fw-bold" style="color: #333; font-size: 16px; font-family:'Times New Roman', serif; letter-spacing:1px;">QUÉT MÃ THANH TOÁN</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; right: 15px; top: 15px; font-size:12px;"></button>
+        </div>
+        <div class="modal-body text-center pt-3 pb-4">
+          <div class="mb-3 text-muted" style="font-size: 13px;">
+            Vui lòng quét mã QR dưới đây để thực hiện thanh toán chuyển khoản:
+          </div>
+          
+          <div class="p-3 bg-light rounded-3 mb-3 d-inline-block" style="border: 1px dashed #c8a165;">
+            <img src="/assets/images/payment_qr.png" id="paymentQrImg" alt="Mã QR Thanh Toán" style="width: 220px; height: 220px; object-fit: contain; display: block; margin: 0 auto;" onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=LUMIÈREFineJewelryPayment';"/>
+          </div>
+
+          <div class="mb-3">
+            <span style="font-size:12px; color:#999; text-transform: uppercase; letter-spacing:1px; display:block;">Số tiền cần thanh toán</span>
+            <span class="fw-bold" id="qrPayAmount" style="font-size:22px; color:#c8a165;">0₫</span>
+          </div>
+
+          <div class="text-start p-3 rounded bg-light" style="font-size:12px; line-height: 1.6; border-left: 3px solid #c8a165;">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-muted">Ngân hàng:</span>
+              <strong id="qrBankName">Vietcombank</strong>
+            </div>
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-muted">Chủ tài khoản:</span>
+              <strong>CÔNG TY TNHH LUMIÈRE</strong>
+            </div>
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-muted">Số tài khoản:</span>
+              <strong id="qrAccountNo">0071000123456</strong>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="text-muted">Nội dung CK:</span>
+              <strong style="color: #dc3545;" id="qrTransferNote">LUMIÈRE</strong>
+            </div>
+          </div>
+
+          <div class="mt-3 text-muted" style="font-size: 11px;">
+            Hệ thống sẽ kiểm tra và xác nhận giao dịch tự động.
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0 d-flex gap-2">
+          <button type="button" class="btn btn-secondary flex-grow-1 py-2" data-bs-dismiss="modal" style="font-size: 13px; border-radius: 6px;">HỦY GIAO DỊCH</button>
+          <button type="button" id="btnConfirmPayment" class="btn btn-primary flex-grow-1 py-2 border-0" style="background-color: #c8a165; color: white; font-size: 13px; border-radius: 6px;">ĐÃ THANH TOÁN</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+      window.IS_LOGGED_IN = <?php echo isset($_SESSION["user_logged_in"]) &&
+      $_SESSION["user_logged_in"] === true
+          ? "true"
+          : "false"; ?>;
+      window.savedAddress = {
+          province: <?php echo json_encode($user['province_city'] ?? ''); ?>,
+          district: <?php echo json_encode($user['district'] ?? ''); ?>,
+          ward: <?php echo json_encode($user['ward_commune'] ?? ''); ?>
+      };
+    </script>
+    <script src="/assets/js/cart.js"></script>
+    <script src="/assets/js/pay.js"></script>
+    <script src="/assets/js/chat.js"></script>
+  </body>
+</html>

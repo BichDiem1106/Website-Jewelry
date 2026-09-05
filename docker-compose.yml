@@ -1,0 +1,84 @@
+services:
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app_php
+
+    ports:
+      - "8080:80"
+    volumes:
+      - ./src:/var/www/html
+    environment:
+      DB_HOST: mysql
+      DB_NAME: ${DB_NAME:-app_db}
+      DB_USER: ${DB_USER:-app_user}
+      DB_PASSWORD: ${DB_PASSWORD:-app_password}
+    command: sh -c "if [ ! -d /var/www/html/vendor ]; then composer install; fi && mkdir -p /var/www/html/public/assets/images/product && chmod -R 777 /var/www/html/public/assets/images/product && apache2-foreground"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app_network
+
+  mysql:
+    image: mysql:8.0
+    container_name: app_mysql
+
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${DB_NAME:-app_db}
+      MYSQL_USER: ${DB_USER:-app_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-app_password}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db_init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-uroot",
+          "-p${DB_ROOT_PASSWORD:-root}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - app_network
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: app_phpmyadmin
+
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      UPLOAD_LIMIT: 64M
+    ports:
+      - "8081:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app_network
+  mailpit:
+    image: axllent/mailpit
+    container_name: app_mailpit
+
+    ports:
+      - "1025:1025" # Cổng SMTP để PHP gửi mail
+      - "8025:8025" # Giao diện web xem email (http://localhost:8025)
+    networks:
+      - app_network
+volumes:
+  mysql_data:
+
+networks:
+  app_network:
+    driver: bridge
