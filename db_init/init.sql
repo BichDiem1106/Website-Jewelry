@@ -310,14 +310,13 @@ CREATE TABLE contacts (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 INSERT INTO users (user_id, full_name, email, phone, password, role, status) VALUES
-(1, 'Quản Trị Viên', 'admin@LUMIÈRE.local', '0901234567', '$2y$10$D9arBnnCCmcCb1oj6dNkgOXtipipRyas1XUmTqSpbCupBGvRuJsEO', 'admin', 'active'),
-(2, 'Đạt Đủng Đỉnh', 'test123@gmail.com', '0912345678', '$2y$10$D9arBnnCCmcCb1oj6dNkgOXtipipRyas1XUmTqSpbCupBGvRuJsEO', 'customer', 'active'),
-(3, 'Bảo chó điên', 'gicungduoc@gmail.com', '0987654321', '$2y$10$D9arBnnCCmcCb1oj6dNkgOXtipipRyas1XUmTqSpbCupBGvRuJsEO', 'customer', 'active'),
-(4, 'Trân Trang Trải', 'huyentran@gmail.com', '0987654321', '$2y$10$D9arBnnCCmcCb1oj6dNkgOXtipipRyas1XUmTqSpbCupBGvRuJsEO', 'customer', 'active'),
-(5, 'Luân Lẳng Lơ', 'duyluan@gmail.com', '0987654321', '$2y$10$D9arBnnCCmcCb1oj6dNkgOXtipipRyas1XUmTqSpbCupBGvRuJsEO', 'customer', 'active'),
-(6, 'Thuấn Thì Thầm', 'thuan@gmail.com', '0987654321', '$2y$10$D9arBnnCCmcCb1oj6dNkgOXtipipRyas1XUmTqSpbCupBGvRuJsEO', 'customer', 'active'),
-(7, 'Trời lạnh rồi', 'bang@gmail.com', '0987654321', '$2y$10$D9arBnnCCmcCb1oj6dNkgOXtipipRyas1XUmTqSpbCupBGvRuJsEO', 'customer', 'active');
-
+(1, 'Quản Trị Viên', 'admin@LUMIÈRE.local', '0901234567', '$2y$10$3tKrnBfG8kU9N6Mv3.jRDuM2h2l5R3r0C1q9P7n4X0z2a4c6e8G.W', 'admin', 'active'),
+(2, 'Đạt Đủng Đỉnh', 'test123@gmail.com', '0912345678', '$2y$10$3tKrnBfG8kU9N6Mv3.jRDuM2h2l5R3r0C1q9P7n4X0z2a4c6e8G.W', 'customer', 'active'),
+(3, 'Bảo chó điên', 'gicungduoc@gmail.com', '0987654321', '$2y$10$3tKrnBfG8kU9N6Mv3.jRDuM2h2l5R3r0C1q9P7n4X0z2a4c6e8G.W', 'customer', 'active'),
+(4, 'Trân Trang Trải', 'huyentran@gmail.com', '0987654321', '$2y$10$3tKrnBfG8kU9N6Mv3.jRDuM2h2l5R3r0C1q9P7n4X0z2a4c6e8G.W', 'customer', 'active'),
+(5, 'Luân Lẳng Lơ', 'duyluan@gmail.com', '0987654321', '$2y$10$3tKrnBfG8kU9N6Mv3.jRDuM2h2l5R3r0C1q9P7n4X0z2a4c6e8G.W', 'customer', 'active'),
+(6, 'Thuấn Thì Thầm', 'thuan@gmail.com', '0987654321', '$2y$10$3tKrnBfG8kU9N6Mv3.jRDuM2h2l5R3r0C1q9P7n4X0z2a4c6e8G.W', 'customer', 'active'),
+(7, 'Trời lạnh rồi', 'bang@gmail.com', '0987654321', '$2y$10$3tKrnBfG8kU9N6Mv3.jRDuM2h2l5R3r0C1q9P7n4X0z2a4c6e8G.W', 'customer', 'active');
 
 
 INSERT INTO categories (category_name, description, status) VALUES
