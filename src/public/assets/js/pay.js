@@ -297,7 +297,7 @@ function renderTotals() {
 function updateTransferNote() {
   const name = fullNameInput.value.trim() || "___";
   const phone = phoneInput.value.trim() || "___";
-  transferNoteCode.textContent = `LUMIERE ${name} ${phone}`;
+  transferNoteCode.textContent = `AURELIA ${name} ${phone}`;
 }
 
 paymentMethods.addEventListener("change", (e) => {

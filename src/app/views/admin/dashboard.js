@@ -1,305 +1,197 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const ctx = document.getElementById('salesTrendsChart').getContext('2d');
+document.addEventListener("DOMContentLoaded", () => {
+    // ==========================================
+    // 1. KHỞI TẠO BIỂU ĐỒ DOANH SỐ (CHART.JS)
+    // ==========================================
+    const chartCanvas = document.getElementById("salesTrendsChart");
+    if (chartCanvas && typeof Chart !== "undefined") {
+        const ctx = chartCanvas.getContext("2d");
 
-    // Tạo hiệu ứng đổ bóng mờ (Gradient) phía dưới đường line
-    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-    gradient.addColorStop(0, 'rgba(179, 155, 125, 0.2)'); // Màu vàng nhạt mờ ở trên
-    gradient.addColorStop(1, 'rgba(179, 155, 125, 0.0)'); // Trong suốt ở dưới cùng
+        // Hiệu ứng Gradient mờ sang trọng
+        const fillGradient = ctx.createLinearGradient(0, 0, 0, 320);
+        fillGradient.addColorStop(0, "rgba(197, 168, 128, 0.28)");
+        fillGradient.addColorStop(1, "rgba(197, 168, 128, 0.0)");
 
-    const salesChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [{
-                label: 'Sales ($)',
-                data: [65000, 58000, 81000, 80000, 55000, 92000], // Bộ dữ liệu tương ứng đồ thị của hình mẫu
-                borderColor: '#b39b7d', // Màu đường line (vàng đồng)
-                borderWidth: 2,
-                backgroundColor: gradient,
-                fill: true,
-                tension: 0.4, // Độ uốn cong mượt mà của đường lượn sóng
-                pointBackgroundColor: '#ffffff',
-                pointBorderColor: '#b39b7d',
-                pointBorderWidth: 2,
-                pointRadius: 4,
-                pointHoverRadius: 6
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false // Ẩn nhãn chú thích thừa
-                }
+        new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: ["Thg 1", "Thg 2", "Thg 3", "Thg 4", "Thg 5", "Thg 6"],
+                datasets: [{
+                    label: "Doanh thu (VNĐ)",
+                    data: [65000000, 58000000, 81000000, 80000000, 55000000, 92000000],
+                    borderColor: "#b39b7d",
+                    borderWidth: 2.2,
+                    backgroundColor: fillGradient,
+                    fill: true,
+                    tension: 0.38,
+                    pointBackgroundColor: "#ffffff",
+                    pointBorderColor: "#b39b7d",
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6.5,
+                    pointHoverBackgroundColor: "#b39b7d",
+                    pointHoverBorderColor: "#ffffff",
+                    pointHoverBorderWidth: 2
+                }]
             },
-            scales: {
-                y: {
-                    min: 0,
-                    max: 100000,
-                    ticks: {
-                        stepSize: 10000,
-                        callback: function(value) {
-                            return '$' + value / 1000 + 'k'; // Format trục Y thành $10k, $20k...
-                        },
-                        font: { size: 10 }
-                    },
-                    grid: {
-                        color: '#f4f1eb' // Màu các đường kẻ ngang mờ
-                    },
-                    border: { dash: [5, 5] } // Nét đứt
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => `Doanh số: ${Number(context.raw).toLocaleString('vi-VN')}₫`
+                        }
+                    }
                 },
-                x: {
-                    grid: {
-                        display: false // Ẩn lưới trục dọc X cho sạch mắt
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: (val) => `${(val / 1000000).toFixed(0)}Tr`,
+                            font: { size: 11 },
+                            color: "#8c827a"
+                        },
+                        grid: {
+                            color: "#f2eee9"
+                        },
+                        border: { dash: [4, 4] }
                     },
-                    ticks: { font: { size: 11 } }
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            font: { size: 11 },
+                            color: "#8c827a"
+                        }
+                    }
                 }
             }
-        }
-    });
-});
-// --- QUẢN LÝ DANH SÁCH GIAO DỊCH (TRANSACTIONS VIEW ALL) ---
-document.addEventListener("DOMContentLoaded", function () {
-    const ctx = document.getElementById('salesTrendsChart').getContext('2d');
+        });
+    }
 
-    // Tạo hiệu ứng đổ bóng mờ (Gradient) phía dưới đường line
-    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-    gradient.addColorStop(0, 'rgba(179, 155, 125, 0.2)'); // Màu vàng nhạt mờ ở trên
-    gradient.addColorStop(1, 'rgba(179, 155, 125, 0.0)'); // Trong suốt ở dưới cùng
-
-    const salesChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [{
-                label: 'Sales ($)',
-                data: [65000, 58000, 81000, 80000, 55000, 92000], 
-                borderColor: '#b39b7d', // Màu đường line (vàng đồng)
-                borderWidth: 2,
-                backgroundColor: gradient,
-                fill: true,
-                tension: 0.4, // Độ uốn cong mượt mà của đường lượn sóng
-                pointBackgroundColor: '#ffffff',
-                pointBorderColor: '#b39b7d',
-                pointBorderWidth: 2,
-                pointRadius: 4,
-                pointHoverRadius: 6
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false // Ẩn nhãn chú thích thừa
-                }
-            },
-            scales: {
-                y: {
-                    min: 0,
-                    max: 100000,
-                    ticks: {
-                        stepSize: 10000,
-                        callback: function(value) {
-                            return '$' + value / 1000 + 'k'; // Format trục Y thành $10k, $20k...
-                        },
-                        font: { size: 10 }
-                    },
-                    grid: {
-                        color: '#f4f1eb' // Màu các đường kẻ ngang mờ
-                    },
-                    border: { dash: [5, 5] } // Nét đứt
-                },
-                x: {
-                    grid: {
-                        display: false // Ẩn lưới trục dọc X cho sạch mắt
-                    },
-                    ticks: { font: { size: 11 } }
-                }
-            }
-        }
-    });
-});
-
-// --- QUẢN LÝ DANH SÁCH GIAO DỊCH (TRANSACTIONS VIEW ALL) ---
-document.addEventListener("DOMContentLoaded", function () {
-    // 1. Mảng dữ liệu mẫu
+    // ==========================================
+    // 2. DỮ LIỆU & RENDER GIAO DỊCH PHỤ TRỢ (NẾU CÓ WIDGET)
+    // ==========================================
     const transactionsData = [
-        { id: "#8921", item: '1x "Aurelia" Eternity Ring', amount: "$2,450.00", time: "2m ago", img: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=100&auto=format&fit=crop&q=60" },
-        { id: "#8920", item: "1x Pearl Drop Earrings", amount: "$1,200.00", time: "15m ago", img: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=100&auto=format&fit=crop&q=60" },
-        { id: "#8919", item: "1x Diamond Tennis Bracelet", amount: "$4,800.00", time: "1h ago", img: "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=100&auto=format&fit=crop&q=60" },
-        { id: "#8918", item: "2x Gold Chain Choker", amount: "$1,950.00", time: "3h ago", img: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=100&auto=format&fit=crop&q=60" },
-        { id: "#8917", item: "1x Sapphire Pendant", amount: "$3,100.00", time: "5h ago", img: "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=100&auto=format&fit=crop&q=60" },
-        { id: "#8916", item: "1x Emerald Solitaire Ring", amount: "$5,200.00", time: "1d ago", img: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=100&auto=format&fit=crop&q=60" },
-        { id: "#8915", item: "1x Cushion-Cut Topaz Brooch", amount: "$2,900.00", time: "2d ago", img: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=100&auto=format&fit=crop&q=60" }
+        { id: "#8921", item: '1x Nhẫn Kim Cương Solitaire', amount: "24.500.000₫", time: "2 phút trước", img: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=100&auto=format&fit=crop&q=60" },
+        { id: "#8920", item: "1x Bông Tai Ngọc Trai South Sea", amount: "12.000.000₫", time: "15 phút trước", img: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=100&auto=format&fit=crop&q=60" },
+        { id: "#8919", item: "1x Lắc Tay Tennis Kim Cương", amount: "48.000.000₫", time: "1 giờ trước", img: "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=100&auto=format&fit=crop&q=60" },
+        { id: "#8918", item: "2x Dây Chuyền Vàng Ý 18K", amount: "19.500.000₫", time: "3 giờ trước", img: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=100&auto=format&fit=crop&q=60" }
     ];
 
-    // 2. Tìm các khung chứa trên giao diện HTML
-    const modalListContainer = document.getElementById("modalTransactionsList");
-    const widgetListContainer = document.getElementById("widgetTransactionsList");
-
-    // Hàm tạo chuỗi HTML cho mỗi dòng giao dịch
-    function generateTransactionHTML(tx) {
-        return `
-            <div class="activity-item d-flex justify-content-between align-items-center p-2 rounded row-hover-effect">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="item-img bg-light rounded" style="width:45px; height:45px; background: url('${tx.img}') center/cover;"></div>
-                    <div>
-                        <h6 class="mb-0 small fw-bold">Order ${tx.id}</h6>
-                        <small class="text-muted font-xs">${tx.item}</small>
-                    </div>
-                </div>
-                <div class="text-end">
-                    <span class="d-block small fw-bold text-dark">${tx.amount}</span>
-                    <small class="text-muted font-xs">${tx.time}</small>
+    const formatTxHTML = (tx) => `
+        <div class="activity-item d-flex justify-content-between align-items-center p-2 rounded row-hover-effect">
+            <div class="d-flex align-items-center gap-3">
+                <div class="item-img bg-light rounded" style="width:42px; height:42px; background: url('${tx.img}') center/cover;"></div>
+                <div>
+                    <h6 class="mb-0 small fw-bold">Đơn hàng ${tx.id}</h6>
+                    <small class="text-muted font-xs">${tx.item}</small>
                 </div>
             </div>
-        `;
-    }
+            <div class="text-end">
+                <span class="d-block small fw-bold text-dark">${tx.amount}</span>
+                <small class="text-muted font-xs">${tx.time}</small>
+            </div>
+        </div>
+    `;
 
-    // 3. Tự động đổ dữ liệu vào giao diện
-    if (transactionsData.length > 0) {
-        if (modalListContainer) {
-            modalListContainer.innerHTML = transactionsData.map(generateTransactionHTML).join("");
-        }
+    const modalList = document.getElementById("modalTransactionsList");
+    const widgetList = document.getElementById("widgetTransactionsList");
 
-        if (widgetListContainer) {
-            const recentTwo = transactionsData.slice(0, 2); 
-            widgetListContainer.innerHTML = recentTwo.map(generateTransactionHTML).join("");
-        }
-    }
+    if (modalList) modalList.innerHTML = transactionsData.map(formatTxHTML).join("");
+    if (widgetList) widgetList.innerHTML = transactionsData.slice(0, 2).map(formatTxHTML).join("");
 
     // ==========================================
-    // MẢNG DỮ LIỆU ĐƯỢC GIỮ LẠI ĐỂ PHỤC VỤ AUDIT LOGS MODAL
+    // 3. XUẤT BÁO CÁO CSV (SALES & INVENTORY)
     // ==========================================
-    const coreNotifications = [
-        { id: 1, cat: 'order', title: 'New Order #8922', desc: 'Customer placed an order for 1x "Aurelia" Eternity Ring.', time: 'Just now', icon: 'bi-bag-check', bg: '#e8f5e9', color: '#2e7d32', isUnread: true },
-        { id: 2, cat: 'payment', title: 'Payment Success', desc: 'VNPay confirmed payment of $1,200.00 for Order #8920.', time: '12m ago', icon: 'bi-credit-card', bg: '#e8f5e9', color: '#2e7d32', isUnread: true },
-        { id: 3, cat: 'refund', title: 'Cancellation Request', desc: 'Order #8914 requested a cancellation & full refund.', time: '1h ago', icon: 'bi-arrow-counterclockwise', bg: '#ffebee', color: '#c62828', isUnread: true },
-        { id: 4, cat: 'stock', title: 'Low Stock Alert', desc: '"Petite Diamond Hoops" touched minimum limit (5 left).', time: '3h ago', icon: 'bi-exclamation-triangle', bg: '#ffebee', color: '#c62828', isUnread: true },
-        { id: 5, cat: 'stock', title: 'Out of Stock', desc: '"Gold Chain Choker" is completely sold out.', time: '5h ago', icon: 'bi-x-circle', bg: '#f5f5f5', color: '#424242', isUnread: false },
-        { id: 6, cat: 'review', title: 'New 5-Star Review', desc: 'Sophia L. left a review: "Absolutely stunning craftsmanship!"', time: '1d ago', icon: 'bi-star-fill', bg: '#e3f2fd', color: '#1565c0', isUnread: false },
-        { id: 7, cat: 'chat', title: 'Live Chat Message', desc: 'Guest customer is asking about diamond certification sizes.', time: '1d ago', icon: 'bi-chat-dots', bg: '#e3f2fd', color: '#1565c0', isUnread: false },
-        { id: 8, cat: 'security', title: 'Security Alert', desc: 'Unusual admin login attempt detected from Hanoi location.', time: '2d ago', icon: 'bi-shield-exclamation', bg: '#fff3e0', color: '#ef6c00', isUnread: false },
-        { id: 9, cat: 'report', title: 'Monthly Report Ready', desc: 'May sales summary report has been compiled successfully.', time: '3d ago', icon: 'bi-graph-up-arrow', bg: '#f3e5f5', color: '#6a1b9a', isUnread: false },
-        { id: 10, cat: 'shipping', title: 'Package Dispatched', desc: 'Shipper confirmed successful pickup for Order #8918.', time: '4d ago', icon: 'bi-truck', bg: '#e1f5fe', color: '#0288d1', isUnread: false }
-    ];
+    const btnSales = document.getElementById("btnExportSales");
+    const btnInventory = document.getElementById("btnExportInventory");
+    const dropdownToggle = document.getElementById("dropdownExportReport");
 
-    // ==========================================
-    // 4. CHỨC NĂNG EXPORT BÁO CÁO (ĐÃ FIX LỖI)
-    // ==========================================
-    const btnExportSales = document.getElementById('btnExportSales');
-    const btnExportInventory = document.getElementById('btnExportInventory');
-    const mainDropdownBtn = document.getElementById('dropdownExportReport');
-
-    function downloadCSV(csvString, fileName) {
+    const exportToCSV = (csvContent, fileName) => {
         try {
-            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.setAttribute("href", url);
-            link.setAttribute("download", fileName);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-        } catch (err) {
-            console.error("Lỗi khi tải file:", err);
-            alert("Trình duyệt chặn tải xuống. Vui lòng kiểm tra lại!");
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            const downloadUrl = URL.createObjectURL(blob);
+            const anchor = document.createElement("a");
+            anchor.setAttribute("href", downloadUrl);
+            anchor.setAttribute("download", fileName);
+            document.body.appendChild(anchor);
+            anchor.click();
+            document.body.removeChild(anchor);
+            URL.revokeObjectURL(downloadUrl);
+        } catch (e) {
+            console.error("Lỗi xuất file:", e);
+            alert("Trình duyệt không cho phép tải file. Vui lòng thử lại!");
         }
-    }
+    };
 
-    function setButtonLoading(isLoading) {
-        if (!mainDropdownBtn) return;
+    const toggleButtonLoading = (isLoading) => {
+        if (!dropdownToggle) return;
         if (isLoading) {
-            mainDropdownBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Exporting...';
-            mainDropdownBtn.disabled = true;
+            dropdownToggle.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Đang xuất...';
+            dropdownToggle.disabled = true;
         } else {
-            mainDropdownBtn.innerHTML = '<i class="bi bi-check2 me-2"></i>Success!';
-            mainDropdownBtn.classList.replace('btn-gold', 'btn-success');
+            dropdownToggle.innerHTML = '<i class="bi bi-check2 me-2"></i>Đã xuất!';
+            dropdownToggle.classList.replace("btn-gold", "btn-success");
             setTimeout(() => {
-                mainDropdownBtn.innerHTML = '<i class="bi bi-download me-2"></i>Export Report';
-                mainDropdownBtn.classList.replace('btn-success', 'btn-gold');
-                mainDropdownBtn.disabled = false;
-            }, 2000);
+                dropdownToggle.innerHTML = '<i class="bi bi-download me-2"></i>Export Report';
+                dropdownToggle.classList.replace("btn-success", "btn-gold");
+                dropdownToggle.disabled = false;
+            }, 1800);
         }
-    }
+    };
 
-    if (btnExportSales) {
-        btnExportSales.addEventListener('click', function (e) {
-            e.preventDefault(); // Ngăn hành vi nhảy trang
-            setButtonLoading(true);
+    // Báo cáo doanh số
+    btnSales?.addEventListener("click", (e) => {
+        e.preventDefault();
+        toggleButtonLoading(true);
 
-            setTimeout(() => {
-                const dateToday = new Date().toISOString().slice(0, 10);
-                let csv = "\uFEFF"; 
-                
-                csv += "--- AURELIA FINE JEWELRY - REPORT: SALES & REVENUE ---\n";
-                csv += `Exported Date: ${dateToday}\n\n`;
+        setTimeout(() => {
+            const dateStr = new Date().toISOString().slice(0, 10);
+            let csv = "\uFEFF"; // UTF-8 BOM hiển thị tiếng Việt trên Excel
+            csv += "--- LUMIERE FINE JEWELRY - BÁO CÁO DOANH THU & DOANH SỐ ---\n";
+            csv += `Ngày xuất báo cáo: ${dateStr}\n\n`;
+            csv += "[1. CHỈ SỐ QUAN TRỌNG]\n";
+            csv += "Chỉ số,Giá trị,Ghi chú\n";
+            csv += "\"Tổng doanh thu gộp\",\"482.950.000₫\",\"Doanh thu ghi nhận trước chiết khấu.\"\n";
+            csv += "\"Doanh thu thuần\",\"458.800.000₫\",\"Sau khi khấu trừ hoàn trả và giảm giá voucher.\"\n";
+            csv += "\"Tổng số đơn hàng\",\"1.284\",\"Tổng đơn thành công và đang giao.\"\n";
+            csv += "\"Giá trị đơn trung bình (AOV)\",\"3.760.000₫\",\"Phân khúc trang sức cao cấp.\"\n\n";
 
-                csv += "[1. KEY METRICS]\n";
-                csv += "Metric Name,Value,Analysis / Note\n";
-                csv += "\"Gross Revenue\",\"$482,950.00\",\"Total sales value generated before deductions.\"\n";
-                csv += "\"Net Revenue\",\"$458,800.00\",\"After subtracting discounts, returns and cancellations.\"\n";
-                csv += "\"Total Orders\",\"1,284\",\"Total successful and processing orders.\"\n";
-                csv += "\"Average Order Value (AOV)\",\"$376.13\",\"High-end premium consumer basket value average.\"\n\n";
+            csv += "[2. TỶ TRỌNG DOANH THU DANH MỤC]\n";
+            csv += "Danh mục,Tỷ trọng (%),Doanh thu ước tính\n";
+            csv += "\"Dây Chuyền Vàng (Necklaces)\",\"45%\",\"217.327.500₫\"\n";
+            csv += "\"Nhẫn Kim Cương (Rings)\",\"32%\",\"154.544.000₫\"\n";
+            csv += "\"Bông Tai Ngọc Trai (Earrings)\",\"23%\",\"111.078.500₫\"\n";
 
-                csv += "[2. REVENUE BY CATEGORY SHARE]\n";
-                csv += "Category / Collection,Percentage Share (%),Estimated Value\n";
-                csv += "\"Ethereal Collection (Necklaces)\",\"45%\",\" $217,327.50 \"\n";
-                csv += "\"Classic Artisanal (Rings)\",\"32%\",\" $154,544.00 \"\n";
-                csv += "\"Heirloom Pearls (Earrings)\",\"23%\",\" $111,078.50 \"\n\n";
+            exportToCSV(csv, `Lumiere_BaoCao_DoanhThu_${dateStr}.csv`);
+            toggleButtonLoading(false);
+        }, 600);
+    });
 
-                csv += "[3. PROMOTION CODE PERFORMANCE]\n";
-                csv += "Coupon Code,Usage Count,Total Generated Revenue,Campaign Status\n";
-                csv += "\"AURELIA10\",\"342\",\" $85,500.00 \",\"Active\"\n";
-                csv += "\"WELCOME5\",\"189\",\" $32,400.00 \",\"Active\"\n";
-                csv += "\"FLASHGOLD20\",\"78\",\" $45,200.00 \",\"Expired\"\n";
+    // Báo cáo tồn kho
+    btnInventory?.addEventListener("click", (e) => {
+        e.preventDefault();
+        toggleButtonLoading(true);
 
-                downloadCSV(csv, `Aurelia_Sales_Report_${dateToday}.csv`);
-                setButtonLoading(false);
-            }, 800);
-        });
-    }
+        setTimeout(() => {
+            const dateStr = new Date().toISOString().slice(0, 10);
+            let csv = "\uFEFF";
+            csv += "--- LUMIERE FINE JEWELRY - BÁO CÁO SẢN PHẨM & TỒN KHO ---\n";
+            csv += `Ngày xuất báo cáo: ${dateStr}\n\n`;
+            csv += "[1. TOP SẢN PHẨM BÁN CHẠY]\n";
+            csv += "Tên sản phẩm,Mã SKU,Số lượng bán,Doanh thu mang lại,Xếp loại\n";
+            csv += "\"Nhẫn Kim Cương Solitaire\",\"LUM-RG-001\",\"420\",\"1.029.000.000₫\",\"Doanh thu cao nhất\"\n";
+            csv += "\"Bông Tai Ngọc Trai\",\"LUM-ER-012\",\"310\",\"372.000.000₫\",\"Số lượng nhiều nhất\"\n";
+            csv += "\"Lắc Tay Tennis Diamond\",\"LUM-BR-009\",\"150\",\"720.000.000₫\",\"Sản phẩm cao cấp\"\n\n";
 
-    if (btnExportInventory) {
-        btnExportInventory.addEventListener('click', function (e) {
-            e.preventDefault(); // Ngăn hành vi nhảy trang
-            setButtonLoading(true);
+            csv += "[2. CẢNH BÁO HÀNG TỒN KHO THẤP CẦN NHẬP]\n";
+            csv += "Tên sản phẩm,Mã SKU,Số lượng còn,Mức tối thiểu,Mức độ ưu tiên\n";
+            csv += "\"Nhẫn Đá Mặt Trăng Moonstone\",\"LUM-RG-008\",\"2\",\"5\",\"KHẨN CẤP - NHẬP NGAY\"\n";
+            csv += "\"Bông Tai Kim Cương Petite\",\"LUM-ER-045\",\"5\",\"5\",\"CẢNH BÁO - CẦN SẢN XUẤT THÊM\"\n";
 
-            setTimeout(() => {
-                const dateToday = new Date().toISOString().slice(0, 10);
-                let csv = "\uFEFF";
-                
-                csv += "--- AURELIA FINE JEWELRY - REPORT: PRODUCT & INVENTORY ---\n";
-                csv += `Exported Date: ${dateToday}\n\n`;
-
-                csv += "[1. TOP BEST-SELLERS PERFORMANCE]\n";
-                csv += "Product Name,SKU,Quantity Sold,Total Revenue,Metric Rank Type\n";
-                csv += "\"1x \"\"Aurelia\"\" Eternity Ring\",\"AUR-ER-001\",\"420\",\" $1,029,000.00 \",\"Top Revenue Generator\"\n";
-                csv += "\"1x Pearl Drop Earrings\",\"AUR-PE-012\",\"310\",\" $372,000.00 \",\"Top Volume Sold\"\n";
-                csv += "\"1x Diamond Tennis Bracelet\",\"AUR-DT-009\",\"150\",\" $720,000.00 \",\"Premium Performer\"\n\n";
-
-                csv += "[2. DEADSTOCK & SLOW-MOVING ITEMS]\n";
-                csv += "Product Name,SKU,Days In Warehouse,Current Stock Units,Suggested Action\n";
-                csv += "\"Silver Geometric Cuff\",\"AUR-SC-089\",\"185 Days\",\"45\",\"Flash Sale / Clearance Pricing\"\n";
-                csv += "\"Vintage Amber Brooch\",\"AUR-VB-102\",\"240 Days\",\"12\",\"Redesign / Material Melting Extraction\"\n\n";
-
-                csv += "[3. INVENTORY STATUS BY ATTRIBUTES]\n";
-                csv += "Product Base,Variant Attribute (Size / Stone),Units Available,Status\n";
-                csv += "\"\"\"Aurelia\"\" Eternity Ring\",\"Size 6 - Diamond 0.5ct\",\"18\",\"In Stock\"\n";
-                csv += "\"\"\"Aurelia\"\" Eternity Ring\",\"Size 7 - Diamond 0.5ct\",\"2\",\"Low Stock Warning\"\n";
-                csv += "\"Pearl Drop Earrings\",\"Standard Size - Akoya Pearl\",\"25\",\"In Stock\"\n\n";
-
-                csv += "[4. LOW STOCK CRITICAL ALERTS]\n";
-                csv += "Product Name,SKU Barcode,Stock Remaining,Minimum Threshold,Priority Level\n";
-                csv += "\"Moonstone Solitaire\",\"AUR-MS-002\",\"2\",\"5\",\"CRITICAL - RESTOCK NOW\"\n";
-                csv += "\"Petite Diamond Hoops\",\"AUR-DH-045\",\"5\",\"5\",\"WARNING - REQUIRE PRODUCTION\"\n";
-
-                downloadCSV(csv, `Aurelia_Inventory_Report_${dateToday}.csv`);
-                setButtonLoading(false);
-            }, 800);
-        });
-    }
+            exportToCSV(csv, `Lumiere_BaoCao_TonKho_${dateStr}.csv`);
+            toggleButtonLoading(false);
+        }, 600);
+    });
 });

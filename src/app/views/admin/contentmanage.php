@@ -2,7 +2,12 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true || ($_SESSION["user_role"] ?? "") !== "admin") {
+
+$isAdmin = !empty($_SESSION["user_logged_in"]) 
+    && $_SESSION["user_logged_in"] === true 
+    && (($_SESSION["user_role"] ?? "") === "admin");
+
+if (!$isAdmin) {
     header("Location: /index.php?page=login");
     exit();
 }
@@ -24,7 +29,6 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
 <div class="container-fluid">
     <div class="row min-vh-100">
 
-        <!-- SIDEBAR -->
         <!-- Sidebar Navigation -->
         <nav class="col-md-3 col-lg-2 sidebar border-end p-4">
             <!-- Mobile Header with Hamburger Trigger -->
@@ -73,17 +77,17 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
                     <div class="user-profile d-flex align-items-center gap-3 pt-3 border-top">
                         <div class="avatar bg-gold text-white rounded-circle d-flex align-items-center justify-content-center fw-bold">
                             <?php 
-                            $words = explode(" ", $_SESSION["user_name"]);
-                            $initials = "";
-                            foreach ($words as $w) {
-                                $initials .= mb_substr($w, 0, 1, "UTF-8");
+                            $nameTokens = array_filter(explode(" ", trim($_SESSION["user_name"] ?? "Admin")));
+                            $shortLetters = "";
+                            foreach ($nameTokens as $token) {
+                                $shortLetters .= mb_substr($token, 0, 1, "UTF-8");
                             }
-                            echo htmlspecialchars(mb_strtoupper(mb_substr($initials, -2, 2, "UTF-8"), "UTF-8"));
+                            echo htmlspecialchars(mb_strtoupper(mb_substr($shortLetters, -2, 2, "UTF-8"), "UTF-8"));
                             ?>
                         </div>
                         <div>
-                            <h6 class="mb-0 small fw-bold text-dark"><?php echo htmlspecialchars($_SESSION["user_name"]); ?></h6>
-                            <small class="text-muted font-xs"><?php echo htmlspecialchars(ucfirst($_SESSION["user_role"])); ?></small>
+                            <h6 class="mb-0 small fw-bold text-dark"><?= htmlspecialchars($_SESSION["user_name"] ?? "Admin") ?></h6>
+                            <small class="text-muted font-xs"><?= htmlspecialchars(ucfirst($_SESSION["user_role"] ?? "admin")) ?></small>
                         </div>
                     </div>
                 </div>
@@ -97,7 +101,7 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
             <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-4 border-bottom">
                 <div>
                     <h1 class="page-title mb-1">Quản lý Nội dung</h1>
-                    <p class="text-muted mb-0 small">Banner · Đánh giá · FAQ · Tin nhắn</p>
+                    <p class="text-muted mb-0 small">Thiết lập Banner · Kiểm duyệt Đánh giá · Câu hỏi FAQ · Tin nhắn liên hệ</p>
                 </div>
             </div>
 
@@ -132,9 +136,9 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
                         <h5 class="section-title mb-0">Banner Trang Chủ</h5>
-                        <small class="text-muted font-xs">Kéo & thả để sắp xếp thứ tự hiển thị</small>
+                        <small class="text-muted font-xs">Sắp xếp các chiến dịch quảng bá trang sức nổi bật</small>
                     </div>
-                    <button class="btn btn-gold py-2 px-4" data-bs-toggle="modal" data-bs-target="#bannerModal" onclick="openBannerModal()">
+                    <button class="btn btn-gold py-2 px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#bannerModal" onclick="openBannerModal()">
                         <i class="bi bi-plus-lg me-2"></i>Thêm Banner
                     </button>
                 </div>
@@ -149,14 +153,14 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
                         <h5 class="section-title mb-0">Quản lý Đánh giá</h5>
-                        <small class="text-muted font-xs">Duyệt, ẩn hoặc xoá đánh giá từ khách hàng</small>
+                        <small class="text-muted font-xs">Duyệt, ẩn hoặc loại bỏ phản hồi từ khách hàng</small>
                     </div>
                     <div class="d-flex gap-2">
                         <select class="form-select form-select-sm border bg-white font-xs" id="reviewFilter" style="min-width:140px;">
-                            <option value="all">Tất cả</option>
-                            <option value="pending">Chờ duyệt</option>
-                            <option value="approved">Đã duyệt</option>
-                            <option value="hidden">Đã ẩn</option>
+                            <option value="all">Tất cả đánh giá</option>
+                            <option value="pending">Chờ kiểm duyệt</option>
+                            <option value="approved">Đã phê duyệt</option>
+                            <option value="hidden">Đang ẩn</option>
                         </select>
                     </div>
                 </div>
@@ -171,9 +175,9 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
                         <h5 class="section-title mb-0">Câu hỏi Thường gặp (FAQ)</h5>
-                        <small class="text-muted font-xs">Hiển thị dạng accordion ở trang người dùng</small>
+                        <small class="text-muted font-xs">Hỗ trợ giải đáp thắc mắc người dùng tại trang giao diện chính</small>
                     </div>
-                    <button class="btn btn-gold py-2 px-4" data-bs-toggle="modal" data-bs-target="#faqModal" onclick="openFaqModal()">
+                    <button class="btn btn-gold py-2 px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#faqModal" onclick="openFaqModal()">
                         <i class="bi bi-plus-lg me-2"></i>Thêm câu hỏi
                     </button>
                 </div>
@@ -188,7 +192,7 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
                         <h5 class="section-title mb-0">Tin nhắn Liên hệ</h5>
-                        <small class="text-muted font-xs">Xem và quản lý tin nhắn từ khách hàng</small>
+                        <small class="text-muted font-xs">Tiếp nhận và xử lý yêu cầu phản hồi từ đối tác & khách hàng</small>
                     </div>
                     <div class="d-flex gap-2">
                         <button class="btn btn-outline-custom py-2 px-3 font-xs" id="markAllReadBtn">
@@ -204,11 +208,11 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
 
             <!-- Footer -->
             <footer class="d-flex justify-content-between text-muted font-xs mt-5 pt-4 border-top">
-                <span>&copy; 2026 Aurelia Fine Jewelry. All rights reserved.</span>
+                <span>&copy; <?= date('Y') ?> LUMIÈRE Fine Jewelry. All rights reserved.</span>
                 <div class="d-flex gap-3">
-                    <a href="#" class="text-muted text-decoration-none">Internal Wiki</a>
-                    <a href="#" class="text-muted text-decoration-none">Tech Support</a>
-                    <a href="#" class="text-muted text-decoration-none">Privacy Policy</a>
+                    <a href="#" class="text-muted text-decoration-none">Tài liệu nội bộ</a>
+                    <a href="#" class="text-muted text-decoration-none">Hỗ trợ kỹ thuật</a>
+                    <a href="#" class="text-muted text-decoration-none">Chính sách bảo mật</a>
                 </div>
             </footer>
         </main>
@@ -223,33 +227,33 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
         <div class="modal-content card shadow-sm border-0 p-2">
             <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title page-title fw-bold text-dark tracking-wider fs-5" id="bannerModalTitle">THÊM BANNER MỚI</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="bannerId">
                 <div class="row g-3">
                     <div class="col-12">
                         <label class="form-label-custom">Tiêu đề banner</label>
-                        <input type="text" class="form-control-custom w-100" id="bannerTitle" placeholder="VD: Bộ sưu tập Hè 2026">
+                        <input type="text" class="form-control-custom w-100" id="bannerTitle" placeholder="VD: Bộ sưu tập Trang sức Mùa Cưới 2026">
                     </div>
                     <div class="col-12">
                         <label class="form-label-custom">Ảnh banner</label>
                         <div class="upload-zone rounded-1 p-4 text-center" id="bannerUploadZone" onclick="document.getElementById('bannerImageInput').click()">
                             <i class="bi bi-cloud-arrow-up fs-2 text-muted d-block mb-2"></i>
-                            <p class="mb-1 small fw-medium">Nhấn để chọn ảnh</p>
-                            <p class="font-xs text-muted mb-0">PNG, JPG, WEBP — tối đa 5MB</p>
+                            <p class="mb-1 small fw-medium">Bấm để duyệt tệp hình ảnh</p>
+                            <p class="font-xs text-muted mb-0">Hỗ trợ PNG, JPG, WEBP — kích thước tối đa 5MB</p>
                             <input type="file" id="bannerImageInput" accept="image/*" class="d-none">
                         </div>
                         <div id="bannerPreviewWrap" class="mt-2 d-none">
-                            <img id="bannerPreview" src="" alt="" class="img-fluid rounded-1" style="max-height:160px;object-fit:cover;width:100%;">
+                            <img id="bannerPreview" src="" alt="Banner Preview" class="img-fluid rounded-1" style="max-height:160px;object-fit:cover;width:100%;">
                         </div>
                     </div>
                     <div class="col-md-8">
-                        <label class="form-label-custom">Link đích (URL)</label>
-                        <input type="text" class="form-control-custom w-100" id="bannerLink" placeholder="VD: /products?collection=summer">
+                        <label class="form-label-custom">Link điều hướng (URL)</label>
+                        <input type="text" class="form-control-custom w-100" id="bannerLink" placeholder="VD: /products?collection=wedding">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label-custom">Thứ tự hiển thị</label>
+                        <label class="form-label-custom">Thứ tự ưu tiên</label>
                         <input type="number" class="form-control-custom w-100" id="bannerOrder" min="1" placeholder="1">
                     </div>
                     <div class="col-12">
@@ -257,14 +261,14 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
                             <label class="form-label-custom mb-0">Trạng thái</label>
                             <div class="form-check form-switch mb-0">
                                 <input class="form-check-input" type="checkbox" id="bannerActive" checked>
-                                <label class="form-check-label font-xs" for="bannerActive">Hiển thị</label>
+                                <label class="form-check-label font-xs" for="bannerActive">Cho phép hiển thị</label>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="text-end mt-4 pt-2 border-top border-light">
-                    <button type="button" class="btn btn-outline-custom py-2 px-3 me-2" data-bs-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-gold py-2 px-4" onclick="saveBanner()">Lưu Banner</button>
+                    <button type="button" class="btn btn-outline-custom py-2 px-3 me-2" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="button" class="btn btn-gold py-2 px-4 shadow-sm" onclick="saveBanner()">Lưu Banner</button>
                 </div>
             </div>
         </div>
@@ -279,21 +283,21 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
         <div class="modal-content card shadow-sm border-0 p-2">
             <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title page-title fw-bold text-dark tracking-wider fs-5" id="faqModalTitle">THÊM CÂU HỎI MỚI</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="faqId">
                 <div class="mb-3">
-                    <label class="form-label-custom">Câu hỏi</label>
-                    <input type="text" class="form-control-custom w-100" id="faqQuestion" placeholder="VD: Chính sách đổi trả của LUMIÈRE là gì?">
+                    <label class="form-label-custom">Nội dung câu hỏi</label>
+                    <input type="text" class="form-control-custom w-100" id="faqQuestion" placeholder="VD: Chính sách bảo hành kim cương và làm sáng trang sức?">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label-custom">Câu trả lời</label>
-                    <textarea class="form-control-custom w-100" id="faqAnswer" rows="5" placeholder="Nhập câu trả lời chi tiết..."></textarea>
+                    <label class="form-label-custom">Câu trả lời chi tiết</label>
+                    <textarea class="form-control-custom w-100" id="faqAnswer" rows="5" placeholder="Nhập câu trả lời giải đáp cho khách hàng..."></textarea>
                 </div>
                 <div class="text-end mt-4 pt-2 border-top border-light">
-                    <button type="button" class="btn btn-outline-custom py-2 px-3 me-2" data-bs-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-gold py-2 px-4" onclick="saveFaq()">Lưu câu hỏi</button>
+                    <button type="button" class="btn btn-outline-custom py-2 px-3 me-2" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="button" class="btn btn-gold py-2 px-4 shadow-sm" onclick="saveFaq()">Lưu câu hỏi</button>
                 </div>
             </div>
         </div>
@@ -308,7 +312,7 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
         <div class="modal-content card shadow-sm border-0 p-2">
             <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title section-title fs-5">Chi tiết Tin nhắn</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
@@ -322,7 +326,7 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
                 <p class="text-dark" style="line-height:1.7;" id="msgDetailBody"></p>
             </div>
             <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-custom py-2 px-3" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-outline-custom py-2 px-3" data-bs-dismiss="modal">Đóng cửa sổ</button>
             </div>
         </div>
     </div>
@@ -339,11 +343,11 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
                     <i class="bi bi-trash3 fs-2 text-danger"></i>
                 </div>
                 <h6 class="fw-bold mb-1" id="deleteModalTitle">Xác nhận xoá?</h6>
-                <p class="text-muted small mb-0" id="deleteModalDesc">Hành động này không thể hoàn tác.</p>
+                <p class="text-muted small mb-0" id="deleteModalDesc">Hành động này sẽ không thể phục hồi dữ liệu.</p>
             </div>
             <div class="modal-footer border-0 pt-0 justify-content-center gap-2">
-                <button type="button" class="btn btn-outline-custom py-2 px-3" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-danger py-2 px-3" id="confirmDeleteBtn">Xoá</button>
+                <button type="button" class="btn btn-outline-custom py-2 px-3" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="button" class="btn btn-danger py-2 px-3 shadow-sm" id="confirmDeleteBtn">Xác nhận xoá</button>
             </div>
         </div>
     </div>

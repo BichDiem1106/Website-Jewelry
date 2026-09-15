@@ -2,33 +2,42 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true || ($_SESSION["user_role"] ?? "") !== "admin") {
+
+$isAdmin = !empty($_SESSION["user_logged_in"]) 
+    && $_SESSION["user_logged_in"] === true 
+    && (($_SESSION["user_role"] ?? "") === "admin");
+
+if (!$isAdmin) {
     header("Location: /index.php?page=login");
     exit();
 }
 
+// Chuyển đổi dữ liệu sản phẩm sang JSON cho Frontend
 $jsProducts = [];
-foreach ($products as $p) {
-    $status = "IN STOCK";
-    if ($p["stock_quantity"] <= 0) {
-        $status = "OUT OF STOCK";
-    } elseif ($p["stock_quantity"] <= 5) {
-        $status = "LOW STOCK";
-    }
+if (!empty($products) && is_iterable($products)) {
+    foreach ($products as $p) {
+        $qty = (int)($p["stock_quantity"] ?? 0);
+        $status = "IN STOCK";
+        if ($qty <= 0) {
+            $status = "OUT OF STOCK";
+        } elseif ($qty <= 5) {
+            $status = "LOW STOCK";
+        }
 
-    $jsProducts[] = [
-        "id" => $p["product_id"],
-        "name" => $p["product_name"],
-        "desc" => $p["description"] ?? "",
-        "category" => $p["category_name"],
-        "category_id" => $p["category_id"],
-        "sku" => "AUR-PROD-" . str_pad($p["product_id"], 3, "0", STR_PAD_LEFT),
-        "price" => (int)$p["price"],
-        "stock" => (int)$p["stock_quantity"],
-        "status" => $status,
-        "image" => "/" . $p["main_image"],
-        "dateAdded" => date("Y-m-d", strtotime($p["created_at"]))
-    ];
+        $jsProducts[] = [
+            "id"          => $p["product_id"],
+            "name"        => $p["product_name"] ?? "",
+            "desc"        => $p["description"] ?? "",
+            "category"    => $p["category_name"] ?? "Trang sức",
+            "category_id" => $p["category_id"] ?? 0,
+            "sku"         => "LUM-PROD-" . str_pad((string)$p["product_id"], 3, "0", STR_PAD_LEFT),
+            "price"       => (int)($p["price"] ?? 0),
+            "stock"       => $qty,
+            "status"      => $status,
+            "image"       => "/" . ltrim($p["main_image"] ?? "favicon.png", "/"),
+            "dateAdded"   => !empty($p["created_at"]) ? date("Y-m-d", strtotime($p["created_at"])) : date("Y-m-d")
+        ];
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -39,10 +48,8 @@ foreach ($products as $p) {
     <title>LUMIÈRE Fine Jewelry - Quản lý sản phẩm</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
-    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    
     <link rel="stylesheet" href="/assets/admin/style.css">
     <link rel="icon" type="image/png" href="/favicon.png" />
 </head>
@@ -101,17 +108,17 @@ foreach ($products as $p) {
                     <div class="user-profile d-flex align-items-center gap-3 pt-3 border-top">
                         <div class="avatar bg-gold text-white rounded-circle d-flex align-items-center justify-content-center fw-bold">
                             <?php 
-                            $words = explode(" ", $_SESSION["user_name"]);
+                            $nameTokens = array_filter(explode(" ", trim($_SESSION["user_name"] ?? "Admin")));
                             $initials = "";
-                            foreach ($words as $w) {
-                                $initials .= mb_substr($w, 0, 1, "UTF-8");
+                            foreach ($nameTokens as $token) {
+                                $initials .= mb_substr($token, 0, 1, "UTF-8");
                             }
                             echo htmlspecialchars(mb_strtoupper(mb_substr($initials, -2, 2, "UTF-8"), "UTF-8"));
                             ?>
                         </div>
                         <div>
-                            <h6 class="mb-0 small fw-bold text-dark"><?php echo htmlspecialchars($_SESSION["user_name"]); ?></h6>
-                            <small class="text-muted font-xs"><?php echo htmlspecialchars(ucfirst($_SESSION["user_role"])); ?></small>
+                            <h6 class="mb-0 small fw-bold text-dark"><?= htmlspecialchars($_SESSION["user_name"] ?? "Admin") ?></h6>
+                            <small class="text-muted font-xs"><?= htmlspecialchars(ucfirst($_SESSION["user_role"] ?? "admin")) ?></small>
                         </div>
                     </div>
                 </div>
@@ -122,58 +129,67 @@ foreach ($products as $p) {
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-end border-bottom pb-4 mb-5 gap-3">
                 <div>
                     <h1 class="page-title display-6 mb-2">Quản lý sản phẩm</h1>
-                    <p class="text-muted mb-0">Quản lý bộ sưu tập thủ công của bạn. Thêm báu vật mới, kiểm soát kho hàng và duy trì các tiêu chuẩn hoàn hảo của Aurelia Fine Jewelry.</p>
+                    <p class="text-muted mb-0">Quản lý các bộ sưu tập trang sức cao cấp, kiểm soát số lượng tồn kho và cập nhật giá bán tại LUMIÈRE.</p>
                 </div>
                 <div>
-                    <a href="/index.php?page=admin_add_product" class="btn btn-gold text-nowrap py-2 px-4">
+                    <a href="/index.php?page=admin_add_product" class="btn btn-gold text-nowrap py-2 px-4 shadow-sm">
                         <i class="bi bi-plus-lg me-2"></i> THÊM SẢN PHẨM MỚI
                     </a>
                 </div>
-            </div>            <?php
-            if (isset($_SESSION["success_message"])) {
-                echo '<div class="alert alert-success">' . htmlspecialchars($_SESSION["success_message"]) . '</div>';
-                unset($_SESSION["success_message"]);
-            }
-            if (isset($_SESSION["error_message"])) {
-                echo '<div class="alert alert-danger">' . htmlspecialchars($_SESSION["error_message"]) . '</div>';
-                unset($_SESSION["error_message"]);
-            }
-            ?>
+            </div>
+
+            <?php if (!empty($_SESSION["success_message"])): ?>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i><?= htmlspecialchars($_SESSION["success_message"]) ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <?php unset($_SESSION["success_message"]); ?>
+            <?php endif; ?>
+
+            <?php if (!empty($_SESSION["error_message"])): ?>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i><?= htmlspecialchars($_SESSION["error_message"]) ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <?php unset($_SESSION["error_message"]); ?>
+            <?php endif; ?>
 
             <div class="row g-5">
-                
+                <!-- Sidebar Lọc Sản Phẩm -->
                 <aside class="col-lg-3">
-                    <div class="filter-sidebar bg-white p-4 border rounded-1">
+                    <div class="filter-sidebar bg-white p-4 border rounded-1 shadow-sm">
                         <h5 class="section-title mb-1">Lọc theo</h5>
-                        <p class="text-muted font-xs mb-4">Thu hẹp phạm vi tìm kiếm</p>
+                        <p class="text-muted font-xs mb-4">Thu hẹp phạm vi tìm kiếm theo danh mục</p>
                         
                         <div class="filter-group d-flex flex-column gap-2 mb-4" id="filterContainer">
-                            <?php foreach ($categories as $cat): ?>
-                                <button class="btn filter-item text-start d-flex align-items-center gap-3 py-2 px-3 text-muted" data-category="<?php echo htmlspecialchars($cat['category_name']); ?>">
-                                    <i class="bi bi-gem"></i> <?php echo htmlspecialchars($cat['category_name']); ?>
-                                </button>
-                            <?php endforeach; ?>
+                            <?php if (!empty($categories) && is_iterable($categories)): ?>
+                                <?php foreach ($categories as $cat): ?>
+                                    <button class="btn filter-item text-start d-flex align-items-center gap-3 py-2 px-3 text-muted" data-category="<?= htmlspecialchars((string)$cat['category_name']) ?>">
+                                        <i class="bi bi-gem"></i> <?= htmlspecialchars((string)$cat['category_name']) ?>
+                                    </button>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </div>
 
                         <hr class="my-4 border-color">
 
                         <div class="d-flex flex-column gap-2">
-                            <a href="#" id="clearFilters" class="text-center text-muted font-xs py-2 text-decoration-none">Xóa tất cả </a>
-                            <button id="applyFilters" class="btn btn-apply-filter w-100 py-2 fw-medium text-uppercase font-xs tracking-wider">Áp dụng bộ lọc</button>
+                            <a href="#" id="clearFilters" class="text-center text-muted font-xs py-2 text-decoration-none">Xóa tất cả bộ lọc</a>
+                            <button id="applyFilters" class="btn btn-apply-filter w-100 py-2 fw-medium text-uppercase font-xs tracking-wider shadow-sm">Áp dụng bộ lọc</button>
                         </div>
                     </div>
                 </aside>
 
+                <!-- Bảng Danh Sách Sản Phẩm -->
                 <section class="col-lg-9">
-                    
-                    <div class="d-flex justify-content-between align-items-center mb-4 gap-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4 gap-4 flex-wrap">
                         <div class="position-relative flex-grow-1" style="max-width: 550px;">
                             <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
                             <input type="text" id="searchInput" class="form-control bg-white ps-5 border py-2 font-xs" placeholder="Tìm kiếm trang sức theo tên hoặc mã SKU...">
                         </div>
                         
                         <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                            <select id="sortSelect" class="form-select border bg-white font-xs text-muted py-2 px-3" style="min-width: 160px;">
+                            <select id="sortSelect" class="form-select border bg-white font-xs text-muted py-2 px-3" style="min-width: 170px;">
                                 <option value="newest">Sắp xếp: Mới nhất</option>
                                 <option value="price-asc">Giá: Thấp đến Cao</option>
                                 <option value="price-desc">Giá: Cao đến Thấp</option>
@@ -181,27 +197,30 @@ foreach ($products as $p) {
                         </div>
                     </div>
 
-                    <div class="table-responsive bg-white border rounded-1">
+                    <div class="table-responsive bg-white border rounded-1 shadow-sm">
                         <table class="table align-middle mb-0">
                             <thead class="table-light-bg font-xs tracking-wider text-muted text-uppercase">
                                 <tr>
                                     <th class="ps-4 py-3" style="width: 40%;">Sản phẩm</th>
                                     <th class="py-3">Danh mục</th>
                                     <th class="py-3">Mã SKU</th>
-                                    <th class="py-3">Giá</th>
+                                    <th class="py-3">Giá niêm yết</th>
                                     <th class="py-3">Trạng thái</th>
                                     <th class="pe-4 py-3 text-end">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody id="productTableBody">
+                                <!-- Đổ dữ liệu tự động bằng productmanage.js -->
                             </tbody>
                         </table>
                     </div>
 
+                    <!-- Phân trang -->
                     <div class="d-flex justify-content-between align-items-center mt-4">
                         <span id="paginationInfo" class="text-muted font-xs">Hiển thị từ 0 đến 0 trong tổng số 0 kết quả</span>
                         <nav>
                             <ul id="paginationControls" class="pagination pagination-sm mb-0 gap-1">
+                                <!-- Tạo nút trang bằng productmanage.js -->
                             </ul>
                         </nav>
                     </div>
@@ -209,12 +228,13 @@ foreach ($products as $p) {
                 </section> 
             </div> 
             
+            <!-- Footer -->
             <footer class="d-flex justify-content-between text-muted font-xs mt-5 pt-4 border-top">
-                <span>&copy; 2026 Aurelia Fine Jewelry. All rights reserved.</span>
+                <span>&copy; <?= date('Y') ?> LUMIÈRE Fine Jewelry. All rights reserved.</span>
                 <div class="d-flex gap-3">
-                    <a href="#" class="text-muted text-decoration-none">Internal Wiki</a>
-                    <a href="#" class="text-muted text-decoration-none">Tech Support</a>
-                    <a href="#" class="text-muted text-decoration-none">Privacy Policy</a>
+                    <a href="#" class="text-muted text-decoration-none">Tài liệu nội bộ</a>
+                    <a href="#" class="text-muted text-decoration-none">Hỗ trợ kỹ thuật</a>
+                    <a href="#" class="text-muted text-decoration-none">Chính sách bảo mật</a>
                 </div>
             </footer>
             
@@ -222,6 +242,7 @@ foreach ($products as $p) {
     </div>
 </div>
 
+<!-- Modal Chỉnh Sửa Chi Tiết Sản Phẩm -->
 <div class="modal fade" id="editProductModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content card shadow-sm border-0 p-2">
@@ -234,44 +255,48 @@ foreach ($products as $p) {
                     <input type="hidden" id="editOldSku">
                     
                     <div class="mb-3">
-                        <label class="form-label-custom">Tên sản phẩm</label>
+                        <label class="form-label-custom">Tên sản phẩm <span class="text-danger">*</span></label>
                         <input type="text" class="form-control-custom w-100" id="editProductName" required>
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label-custom">Mô tả</label>
-                        <textarea class="form-control-custom w-100" id="editProductDesc" rows="3"></textarea>
+                        <label class="form-label-custom">Mô tả sản phẩm</label>
+                        <textarea class="form-control-custom w-100" id="editProductDesc" rows="3" placeholder="Nhập mô tả chi tiết..."></textarea>
                     </div>
                     
                     <div class="row">
                         <div class="col-6 mb-3">
                             <label class="form-label-custom">Danh mục</label>
                             <select class="form-select form-control-custom" id="editProductCategory" required>
-                                <?php foreach ($categories as $cat): ?>
-                                    <option value="<?php echo $cat['category_id']; ?>"><?php echo htmlspecialchars($cat['category_name']); ?></option>
-                                <?php endforeach; ?>
+                                <?php if (!empty($categories) && is_iterable($categories)): ?>
+                                    <?php foreach ($categories as $cat): ?>
+                                        <option value="<?= htmlspecialchars((string)$cat['category_name']) ?>">
+                                            <?= htmlspecialchars((string)$cat['category_name']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
                             </select>
                         </div>
                         <div class="col-6 mb-3">
-                            <label class="form-label-custom">Mã SKU (Chỉ hiển thị)</label>
-                            <input type="text" class="form-control-custom w-100" id="editProductSku" disabled style="background-color:#eee;">
+                            <label class="form-label-custom">Mã SKU (Cố định)</label>
+                            <input type="text" class="form-control-custom w-100" id="editProductSku" disabled style="background-color:#f1f5f9;">
                         </div>
                     </div>
                     
                     <div class="row">
                         <div class="col-6 mb-3">
-                            <label class="form-label-custom">Giá (₫)</label>
-                            <input type="number" class="form-control-custom w-100" id="editProductPrice" required>
+                            <label class="form-label-custom">Giá niêm yết (₫) <span class="text-danger">*</span></label>
+                            <input type="number" min="0" step="1000" class="form-control-custom w-100" id="editProductPrice" required>
                         </div>
                         <div class="col-6 mb-3">
-                            <label class="form-label-custom">Số lượng kho</label>
+                            <label class="form-label-custom">Số lượng trong kho <span class="text-danger">*</span></label>
                             <input type="number" class="form-control-custom w-100" id="editProductStock" min="0" required>
                         </div>
                     </div>
                     
                     <div class="text-end mt-4 pt-2 border-top border-light">
-                        <button type="button" class="btn btn-outline-custom py-2 px-3 me-2" data-bs-dismiss="modal">Hủy bộ</button>
-                        <button type="submit" class="btn btn-gold py-2 px-4">Cập nhật sản phẩm</button>
+                        <button type="button" class="btn btn-outline-custom py-2 px-3 me-2" data-bs-dismiss="modal">Hủy bỏ</button>
+                        <button type="submit" class="btn btn-gold py-2 px-4 shadow-sm">Cập nhật sản phẩm</button>
                     </div>
                 </form>
             </div>
@@ -280,7 +305,7 @@ foreach ($products as $p) {
 </div>
 
 <script>
-window.productsData = <?php echo json_encode($jsProducts); ?>;
+window.productsData = <?= json_encode($jsProducts, JSON_UNESCAPED_UNICODE); ?>;
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/assets/admin/productmanage.js"></script>

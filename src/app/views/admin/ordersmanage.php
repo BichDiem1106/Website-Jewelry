@@ -2,10 +2,26 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true || ($_SESSION["user_role"] ?? "") !== "admin") {
+
+$isAdmin = !empty($_SESSION["user_logged_in"]) 
+    && $_SESSION["user_logged_in"] === true 
+    && (($_SESSION["user_role"] ?? "") === "admin");
+
+if (!$isAdmin) {
     header("Location: /index.php?page=login");
     exit();
 }
+
+// Bảng cấu hình trạng thái đơn hàng
+$statusMeta = [
+    'pending'          => ['class' => 'status-pending',    'text' => 'Chờ xử lý'],
+    'processing'       => ['class' => 'status-processing', 'text' => 'Đang xử lý'],
+    'shipping'         => ['class' => 'status-processing', 'text' => 'Đang giao'],
+    'delivered'        => ['class' => 'status-shipped',    'text' => 'Đã giao'],
+    'cancelled'        => ['class' => 'status-cancelled',  'text' => 'Đã hủy'],
+    'return_requested' => ['class' => 'status-pending',    'text' => 'Yêu cầu hoàn trả (Đang thu hồi)'],
+    'returned'         => ['class' => 'status-returned',   'text' => 'Đã hoàn trả thành công']
+];
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -75,17 +91,17 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
                     <div class="user-profile d-flex align-items-center gap-3 pt-3 border-top">
                         <div class="avatar bg-gold text-white rounded-circle d-flex align-items-center justify-content-center fw-bold">
                             <?php 
-                            $words = explode(" ", $_SESSION["user_name"]);
-                            $initials = "";
-                            foreach ($words as $w) {
-                                $initials .= mb_substr($w, 0, 1, "UTF-8");
+                            $nameParts = array_filter(explode(" ", trim($_SESSION["user_name"] ?? "Admin")));
+                            $shortInitials = "";
+                            foreach ($nameParts as $part) {
+                                $shortInitials .= mb_substr($part, 0, 1, "UTF-8");
                             }
-                            echo htmlspecialchars(mb_strtoupper(mb_substr($initials, -2, 2, "UTF-8"), "UTF-8"));
+                            echo htmlspecialchars(mb_strtoupper(mb_substr($shortInitials, -2, 2, "UTF-8"), "UTF-8"));
                             ?>
                         </div>
                         <div>
-                            <h6 class="mb-0 small fw-bold text-dark"><?php echo htmlspecialchars($_SESSION["user_name"]); ?></h6>
-                            <small class="text-muted font-xs"><?php echo htmlspecialchars(ucfirst($_SESSION["user_role"])); ?></small>
+                            <h6 class="mb-0 small fw-bold text-dark"><?= htmlspecialchars($_SESSION["user_name"] ?? "Admin") ?></h6>
+                            <small class="text-muted font-xs"><?= htmlspecialchars(ucfirst($_SESSION["user_role"] ?? "admin")) ?></small>
                         </div>
                     </div>
                 </div>
@@ -97,10 +113,11 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
             <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
                 <div>
                     <h2 class="page-title mb-1">Quản lý đơn hàng</h2>
-                    <small class="text-muted">Theo dõi, lọc và xử lý các đơn hàng cao cấp từ cơ sở dữ liệu.</small>
+                    <small class="text-muted">Theo dõi tiến độ, thanh toán và vận chuyển đơn hàng trực tuyến của LUMIÈRE.</small>
                 </div>
             </div>
 
+            <!-- Bộ lọc đơn hàng -->
             <div class="card bg-white p-3 mb-4 shadow-sm border-0">
                 <div class="row g-3 align-items-center">
                     <div class="col-12 col-md-4">
@@ -129,11 +146,12 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
                         </select>
                     </div>
                     <div class="col-12 col-md-2">
-                        <button id="btnApplyFilters" class="btn btn-gold w-100 font-xs text-uppercase tracking-wider py-2">Áp dụng lọc</button>
+                        <button id="btnApplyFilters" class="btn btn-gold w-100 font-xs text-uppercase tracking-wider py-2 shadow-sm">Áp dụng lọc</button>
                     </div>
                 </div>
             </div>
 
+            <!-- Bảng danh sách đơn hàng -->
             <div class="card bg-white border-0 shadow-sm overflow-hidden">
                 <div class="table-responsive table-custom-wrapper">
                     <table class="table align-middle mb-0" id="ordersTable">
@@ -158,39 +176,45 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
                                 <tr>
                                     <td colspan="8" class="text-center py-5 text-muted">
                                         <i class="bi bi-inbox fs-2 d-block mb-2"></i>
-                                        Không có đơn hàng nào được tìm thấy
+                                        Không tìm thấy dữ liệu đơn hàng phù hợp
                                     </td>
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($orders as $o): ?>
+                                    <?php 
+                                    $curStatus = $o["status"] ?? 'pending';
+                                    $stInfo = $statusMeta[$curStatus] ?? ['class' => 'status-pending', 'text' => $curStatus];
+                                    ?>
                                     <tr class="row-hover" 
-                                        data-id="<?php echo htmlspecialchars($o["order_code"]); ?>" 
-                                        data-customer="<?php echo htmlspecialchars($o["full_name"]); ?>" 
-                                        data-payment="<?php echo htmlspecialchars($o["payment_method"]); ?>" 
-                                        data-fulfillment="<?php echo htmlspecialchars($o["status"]); ?>"
-                                        data-db-id="<?php echo htmlspecialchars($o["order_id"]); ?>">
+                                        data-id="<?= htmlspecialchars((string)$o["order_code"]) ?>" 
+                                        data-customer="<?= htmlspecialchars((string)$o["full_name"]) ?>" 
+                                        data-payment="<?= htmlspecialchars((string)$o["payment_method"]) ?>" 
+                                        data-fulfillment="<?= htmlspecialchars((string)$curStatus) ?>"
+                                        data-db-id="<?= htmlspecialchars((string)$o["order_id"]) ?>">
                                         <td class="ps-4">
                                             <div class="form-check custom-checkbox">
                                                 <input class="form-check-input" type="checkbox">
                                             </div>
                                         </td>
-                                        <td><span class="fw-bold text-dark">#<?php echo htmlspecialchars($o["order_code"]); ?></span></td>
+                                        <td><span class="fw-bold text-dark">#<?= htmlspecialchars((string)$o["order_code"]) ?></span></td>
                                         <td>
                                             <div class="d-flex align-items-center gap-2">
                                                 <div class="avatar-sm bg-light-custom rounded-circle d-flex align-items-center justify-content-center fw-medium text-secondary font-xs">
-                                                    <?php echo htmlspecialchars(mb_substr($o["full_name"], 0, 2, "UTF-8")); ?>
+                                                    <?= htmlspecialchars(mb_substr((string)$o["full_name"], 0, 2, "UTF-8")) ?>
                                                 </div>
                                                 <div>
-                                                    <div class="fw-medium text-dark small"><?php echo htmlspecialchars($o["full_name"]); ?></div>
-                                                    <div class="text-muted font-xs">SĐT: <?php echo htmlspecialchars($o["receiver_phone"]); ?></div>
+                                                    <div class="fw-medium text-dark small"><?= htmlspecialchars((string)$o["full_name"]) ?></div>
+                                                    <div class="text-muted font-xs">SĐT: <?= htmlspecialchars((string)$o["receiver_phone"]) ?></div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="text-muted font-xs"><?php echo date("d/m/Y H:i", strtotime($o["created_at"])); ?></td>
-                                        <td class="font-numeric text-dark fw-bold"><?php echo number_format($o["final_amount"], 0, ',', '.'); ?>₫</td>
+                                        <td class="text-muted font-xs">
+                                            <?= !empty($o["created_at"]) ? (new DateTime($o["created_at"]))->format("d/m/Y H:i") : "—" ?>
+                                        </td>
+                                        <td class="font-numeric text-dark fw-bold"><?= number_format((float)($o["final_amount"] ?? 0), 0, ',', '.') ?>₫</td>
                                         <td>
                                             <span class="status-badge">
-                                                <?php if ($o["payment_method"] === "cod"): ?>
+                                                <?php if (($o["payment_method"] ?? "") === "cod"): ?>
                                                     <i class="bi bi-cash status-paid me-1"></i> COD
                                                 <?php else: ?>
                                                     <i class="bi bi-credit-card status-pending me-1"></i> Chuyển khoản
@@ -198,30 +222,10 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
                                             </span>
                                         </td>
                                         <td>
-                                            <?php
-                                            $statusClass = "status-pending";
-                                            $statusText = "Chờ xử lý";
-                                            if ($o["status"] === "processing") {
-                                                $statusClass = "status-processing";
-                                                $statusText = "Đang xử lý";
-                                            } elseif ($o["status"] === "shipping") {
-                                                $statusClass = "status-processing";
-                                                $statusText = "Đang giao";
-                                            } elseif ($o["status"] === "delivered") {
-                                                $statusClass = "status-shipped";
-                                                $statusText = "Đã giao";
-                                            } elseif ($o["status"] === "cancelled") {
-                                                $statusClass = "status-cancelled";
-                                                $statusText = "Đã hủy";
-                                            } elseif ($o["status"] === "return_requested") {
-                                                $statusClass = "status-pending"; // using yellow color
-                                                $statusText = "Yêu cầu hoàn trả (Đang thu hồi)";
-                                            } elseif ($o["status"] === "returned") {
-                                                $statusClass = "status-returned";
-                                                $statusText = "Đã hoàn trả thành công";
-                                            }
-                                            ?>
-                                            <span class="status-badge"><i class="bi bi-circle-fill font-xs <?php echo $statusClass; ?> me-1"></i> <?php echo $statusText; ?></span>
+                                            <span class="status-badge">
+                                                <i class="bi bi-circle-fill font-xs <?= $stInfo['class'] ?> me-1"></i> 
+                                                <?= $stInfo['text'] ?>
+                                            </span>
                                         </td>
                                         <td class="text-end pe-4">
                                             <button class="btn btn-outline-custom font-xs btn-update-status">CẬP NHẬT TRẠNG THÁI</button>
@@ -237,6 +241,7 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
     </div>
 </div>
 
+<!-- Modal cập nhật trạng thái -->
 <div class="modal fade" id="updateStatusModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
         <div class="modal-content card shadow-sm border-0 p-2">
@@ -266,7 +271,7 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
                 </div>
                 <div class="text-end mt-4 pt-2 border-top border-light">
                     <button type="button" class="btn btn-outline-custom py-2 px-3 me-2" data-bs-dismiss="modal">Hủy bỏ</button>
-                    <button type="button" class="btn btn-gold py-2 px-4" id="btnSaveStatus">Lưu thay đổi</button>
+                    <button type="button" class="btn btn-gold py-2 px-4 shadow-sm" id="btnSaveStatus">Lưu thay đổi</button>
                 </div>
             </div>
         </div>

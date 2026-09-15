@@ -2,10 +2,26 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true || ($_SESSION["user_role"] ?? "") !== "admin") {
+
+$isAdmin = !empty($_SESSION["user_logged_in"]) 
+    && $_SESSION["user_logged_in"] === true 
+    && (($_SESSION["user_role"] ?? "") === "admin");
+
+if (!$isAdmin) {
     header("Location: /index.php?page=login");
     exit();
 }
+
+// Bảng cấu hình giao diện vai trò và trạng thái người dùng
+$roleBadges = [
+    'admin'    => ['class' => 'bg-danger-subtle text-danger',   'label' => 'Admin'],
+    'customer' => ['class' => 'bg-primary-subtle text-primary', 'label' => 'Khách hàng']
+];
+
+$statusBadges = [
+    'active' => ['class' => 'status-badge-active',   'label' => 'Đang hoạt động'],
+    'locked' => ['class' => 'status-badge-inactive', 'label' => 'Đã khóa']
+];
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -83,17 +99,17 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
                     <div class="user-profile d-flex align-items-center gap-3 pt-3 border-top">
                         <div class="avatar bg-gold text-white rounded-circle d-flex align-items-center justify-content-center fw-bold">
                             <?php 
-                            $words = explode(" ", $_SESSION["user_name"]);
-                            $initials = "";
-                            foreach ($words as $w) {
-                                $initials .= mb_substr($w, 0, 1, "UTF-8");
+                            $nameTokens = array_filter(explode(" ", trim($_SESSION["user_name"] ?? "Admin")));
+                            $shortInitials = "";
+                            foreach ($nameTokens as $token) {
+                                $shortInitials .= mb_substr($token, 0, 1, "UTF-8");
                             }
-                            echo htmlspecialchars(mb_strtoupper(mb_substr($initials, -2, 2, "UTF-8"), "UTF-8"));
+                            echo htmlspecialchars(mb_strtoupper(mb_substr($shortInitials, -2, 2, "UTF-8"), "UTF-8"));
                             ?>
                         </div>
                         <div>
-                            <h6 class="mb-0 small fw-bold text-dark"><?php echo htmlspecialchars($_SESSION["user_name"]); ?></h6>
-                            <small class="text-muted font-xs"><?php echo htmlspecialchars(ucfirst($_SESSION["user_role"])); ?></small>
+                            <h6 class="mb-0 small fw-bold text-dark"><?= htmlspecialchars($_SESSION["user_name"] ?? "Admin") ?></h6>
+                            <small class="text-muted font-xs"><?= htmlspecialchars(ucfirst($_SESSION["user_role"] ?? "admin")) ?></small>
                         </div>
                     </div>
                 </div>
@@ -105,10 +121,11 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
             <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
                 <div>
                     <h2 class="page-title mb-1">Quản lý người dùng</h2>
-                    <small class="text-muted">Cập nhật thông tin thành viên, phân quyền hoặc thay đổi trạng thái hoạt động.</small>
+                    <small class="text-muted">Kiểm soát danh sách tài khoản khách hàng, cập nhật phân quyền và quản lý trạng thái bảo mật.</small>
                 </div>
             </div>
 
+            <!-- Bộ lọc người dùng -->
             <div class="card bg-white p-3 mb-4 shadow-sm border-0">
                 <div class="row g-3 align-items-center">
                     <div class="col-12 col-md-4">
@@ -132,11 +149,12 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
                         </select>
                     </div>
                     <div class="col-12 col-md-2">
-                        <button id="btnApplyFilters" class="btn btn-gold w-100 font-xs text-uppercase tracking-wider py-2">Áp dụng lọc</button>
+                        <button id="btnApplyFilters" class="btn btn-gold w-100 font-xs text-uppercase tracking-wider py-2 shadow-sm">Áp dụng lọc</button>
                     </div>
                 </div>
             </div>
 
+            <!-- Bảng danh sách người dùng -->
             <div class="card bg-white border-0 shadow-sm overflow-hidden">
                 <div class="table-responsive">
                     <table class="table align-middle mb-0" id="usersTable">
@@ -152,34 +170,44 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
                             </tr>
                         </thead>
                         <tbody>
-                            <?php if (empty($users)): ?>
+                            <?php if (empty($users) || !is_iterable($users)): ?>
                                 <tr>
-                                    <td colspan="7" class="text-center py-5 text-muted font-xs">Không tìm thấy người dùng nào.</td>
+                                    <td colspan="7" class="text-center py-5 text-muted font-xs">
+                                        <i class="bi bi-people fs-2 d-block mb-2"></i>
+                                        Không tìm thấy tài khoản người dùng nào.
+                                    </td>
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($users as $u): ?>
+                                    <?php 
+                                    $curRole   = strtolower((string)($u["role"] ?? "customer"));
+                                    $curStatus = strtolower((string)($u["status"] ?? "active"));
+
+                                    $roleInfo   = $roleBadges[$curRole] ?? ['class' => 'bg-secondary-subtle text-secondary', 'label' => ucfirst($curRole)];
+                                    $statusInfo = $statusBadges[$curStatus] ?? ['class' => 'status-badge-active', 'label' => 'Đang hoạt động'];
+                                    ?>
                                     <tr class="user-row" 
-                                        data-id="<?php echo $u["user_id"]; ?>"
-                                        data-name="<?php echo htmlspecialchars($u["full_name"]); ?>"
-                                        data-email="<?php echo htmlspecialchars($u["email"]); ?>"
-                                        data-phone="<?php echo htmlspecialchars($u["phone"]); ?>"
-                                        data-role="<?php echo htmlspecialchars($u["role"]); ?>"
-                                        data-status="<?php echo htmlspecialchars($u["status"]); ?>">
-                                        <td class="ps-4 fw-semibold text-dark font-numeric">#<?php echo $u["user_id"]; ?></td>
+                                        data-id="<?= htmlspecialchars((string)$u["user_id"]) ?>"
+                                        data-name="<?= htmlspecialchars((string)$u["full_name"]) ?>"
+                                        data-email="<?= htmlspecialchars((string)$u["email"]) ?>"
+                                        data-phone="<?= htmlspecialchars((string)($u["phone"] ?? "")) ?>"
+                                        data-role="<?= htmlspecialchars($curRole) ?>"
+                                        data-status="<?= htmlspecialchars($curStatus) ?>">
+                                        <td class="ps-4 fw-semibold text-dark font-numeric">#<?= htmlspecialchars((string)$u["user_id"]) ?></td>
                                         <td>
-                                            <div class="fw-bold text-dark"><?php echo htmlspecialchars($u["full_name"]); ?></div>
+                                            <div class="fw-bold text-dark"><?= htmlspecialchars((string)$u["full_name"]) ?></div>
                                         </td>
-                                        <td><span class="text-muted"><?php echo htmlspecialchars($u["email"]); ?></span></td>
-                                        <td><span class="text-muted font-numeric"><?php echo htmlspecialchars($u["phone"]); ?></span></td>
+                                        <td><span class="text-muted"><?= htmlspecialchars((string)$u["email"]) ?></span></td>
+                                        <td><span class="text-muted font-numeric"><?= htmlspecialchars((string)($u["phone"] ?? "—")) ?></span></td>
                                         <td>
-                                            <span class="badge <?php echo $u["role"] === 'admin' ? 'bg-danger-subtle text-danger' : 'bg-primary-subtle text-primary'; ?> px-2 py-1" style="font-size: 11px;">
-                                                <?php echo $u["role"] === 'admin' ? 'Admin' : 'Khách hàng'; ?>
+                                            <span class="badge <?= $roleInfo['class'] ?> px-2 py-1" style="font-size: 11px;">
+                                                <?= $roleInfo['label'] ?>
                                             </span>
                                         </td>
                                         <td>
                                             <span class="status-badge">
-                                                <i class="bi bi-circle-fill font-xs <?php echo $u["status"] === 'active' ? 'status-badge-active' : 'status-badge-inactive'; ?> me-1"></i>
-                                                <?php echo $u["status"] === 'active' ? 'Đang hoạt động' : 'Đã khóa'; ?>
+                                                <i class="bi bi-circle-fill font-xs <?= $statusInfo['class'] ?> me-1"></i>
+                                                <?= $statusInfo['label'] ?>
                                             </span>
                                         </td>
                                         <td class="text-end pe-4">
@@ -240,7 +268,7 @@ if (!isset($_SESSION["user_logged_in"]) || $_SESSION["user_logged_in"] !== true 
                 
                 <div class="text-end mt-4 pt-2 border-top border-light">
                     <button type="button" class="btn btn-outline-custom py-2 px-3 me-2" data-bs-dismiss="modal">Hủy bỏ</button>
-                    <button type="button" class="btn btn-gold py-2 px-4" id="btnSaveUser">Lưu thay đổi</button>
+                    <button type="button" class="btn btn-gold py-2 px-4 shadow-sm" id="btnSaveUser">Lưu thay đổi</button>
                 </div>
             </div>
         </div>

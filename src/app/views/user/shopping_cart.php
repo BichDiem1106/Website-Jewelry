@@ -204,7 +204,7 @@
       <div class="container-fluid px-5">
           <div class="row">
               <div class="col-md-4 mb-4">
-                  <h4 class="fw-bold gold-text mb-3" style="font-family: 'Times New Roman', serif;">LUMIÈRE</h4>
+                  <h4 class="fw-bold gold-text mb-3" style="font-family: 'Times New Roman', serif;">AURELIA</h4>
                   <p class="text-muted small w-75">Điểm đến của những tuyệt tác trang sức thủ công. Kiến tạo vẻ đẹp vượt thời gian.</p>
                   <p class="small text-muted mt-4">&copy; 2026 LUMIÈRE. Bản quyền thuộc về Nhóm 6.</p>
               </div>
