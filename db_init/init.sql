@@ -256,27 +256,26 @@ CREATE TABLE vouchers (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE reviews (
-    -- Khóa chính
     review_id INT AUTO_INCREMENT PRIMARY KEY,
 
-    -- Khóa ngoại: Ai là người đánh giá và đánh giá sản phẩm nào?
-    user_id INT NOT NULL,
-    product_id INT NOT NULL,
+    user_id INT UNSIGNED NOT NULL,     
+    product_id INT UNSIGNED NOT NULL,  
 
-    -- Số sao đánh giá (Chỉ cho phép từ 1 đến 5)
-    rating TINYINT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    rating TINYINT UNSIGNED NOT NULL CHECK (rating BETWEEN 1 AND 5),
 
-    -- Nội dung bình luận của khách hàng
     comment TEXT,
 
-    -- Trạng thái kiểm duyệt của Admin ('pending': chờ duyệt, 'approved': đã duyệt, 'hidden': bị ẩn)
-    status ENUM('pending', 'approved', 'hidden') DEFAULT 'pending',
+    status ENUM('pending', 'approved', 'hidden') NOT NULL DEFAULT 'pending',
 
-    -- Thời gian đánh giá
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-    -- Ràng buộc: Xóa user hoặc xóa sản phẩm thì đánh giá cũng bay theo
+    -- Mỗi user chỉ được review 1 sản phẩm 1 lần (tuỳ nghiệp vụ, có thể bỏ nếu cho phép nhiều lần)
+    UNIQUE KEY uq_user_product (user_id, product_id),
+
+    -- Index phục vụ query lọc theo trạng thái + sản phẩm
+    KEY idx_product_status (product_id, status),
+
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
