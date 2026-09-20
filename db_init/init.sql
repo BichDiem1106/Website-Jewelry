@@ -326,7 +326,7 @@ CREATE TABLE chat_messages (
 
 INSERT INTO users (user_id, full_name, email, phone, password, role, status) VALUES 
 (1, 'Quản Trị Viên', 'admin@lumiere.local', '0901234567', '$2y$10$yYhJ2p6Aj7P1ZSgBTDck5ONPn8xQ6oIvF4tiTOdTtB6IfMwMDwyJq', 'admin', 'active'),
-(2, 'Bích Diễm', 'diemmin1113@gmail.com', '', '0974068712', '$2y$10$xO4TY9Hn7AwZINGI5WQ2Ce/PPgsbm0kaPYoxle.FAMNDf2t1B2oNO' 'customer', 'active');
+(2, 'Bích Diễm', 'diemmin1113@gmail.com', '0974068712', '$2y$10$xO4TY9Hn7AwZINGI5WQ2Ce/PPgsbm0kaPYoxle.FAMNDf2t1B2oNO', 'customer', 'active');
 
 INSERT INTO categories (category_name, description, status) VALUES
 ('Nhẫn Kim Cương', 'Bộ sưu tập nhẫn đính hôn', 'show'),
@@ -402,8 +402,8 @@ INSERT INTO vouchers (voucher_code, discount_type, discount_value, max_discount_
 ('FLASH25', 'percent', 25, 200000, 1000000, 10, 0, '2026-06-15 00:00:00', '2026-06-20 23:59:59', 'active');
 
 INSERT INTO user_addresses (user_id, receiver_name, receiver_phone, province_city, district, ward_commune, specific_address, is_default) VALUES
-(2, 'Trần Tiến Đạt', '0912345678', 'TP HCM', 'Thuận An', 'Phường An Phú', 'Số 123, ngõ 456, đường Trần Duy Hưng', 1),
-(2, 'Trần Tiến Đạt', '0912345679', 'Hà Nội', 'Quận Hoàn Kiếm', 'Phường Hàng Bạc', 'Số 45, phố Hàng Bạc', 0),
+(2, 'Trần Thị Bích Diễm', '0912345678', 'TP HCM', 'Thuận An', 'Phường An Phú', 'Số 123, ngõ 456, đường Trần Duy Hưng', 1),
+(2, 'Trần Thị Bích Diễm', '0912345679', 'Hà Nội', 'Quận Hoàn Kiếm', 'Phường Hàng Bạc', 'Số 45, phố Hàng Bạc', 0),
 (3, 'Khách Hàng Mẫu', '0987654321', 'TP. Hồ Chí Minh', 'Quận 1', 'Phường Bến Nghé', '123 Đường Lê Lợi', 1),
 (3, 'Khách Hàng Mẫu', '0987654322', 'TP. Hồ Chí Minh', 'Quận 7', 'Phường Tân Phú', 'Số 78, đường Nguyễn Thị Thập', 0);
 
@@ -412,11 +412,11 @@ INSERT INTO user_addresses (user_id, receiver_name, receiver_phone, province_cit
 -- 5. DỮ LIỆU ĐƠN HÀNG (ORDERS)
 -- ==========================================
 INSERT INTO orders (user_id, order_code, receiver_name, receiver_phone, shipping_address, total_amount, discount_amount, final_amount, payment_method, status, created_at) VALUES
-(2, 'ORD-20260601-001', 'Trần Tiến Đạt', '0912345678', 'Số 123, ngõ 456, đường Trần Duy Hưng, Phường Dịch Vọng, Quận Cầu Giấy, Hà Nội', 990000, 99000, 891000, 'cod', 'delivered', '2026-06-01 10:30:00'),
-(2, 'ORD-20260605-002', 'Trần Tiến Đạt', '0912345678', 'Số 123, ngõ 456, đường Trần Duy Hưng, Phường Dịch Vọng, Quận Cầu Giấy, Hà Nội', 450000, 0, 450000, 'bank_transfer', 'shipping', '2026-06-05 14:20:00'),
+(2, 'ORD-20260601-001', 'Trần Thị Bích Diễm', '0912345678', 'Số 123, ngõ 456, đường Trần Duy Hưng, Phường Dịch Vọng, Quận Cầu Giấy, Hà Nội', 990000, 99000, 891000, 'cod', 'delivered', '2026-06-01 10:30:00'),
+(2, 'ORD-20260605-002', 'Trần Thị Bích Diễm', '0912345678', 'Số 123, ngõ 456, đường Trần Duy Hưng, Phường Dịch Vọng, Quận Cầu Giấy, Hà Nội', 450000, 0, 450000, 'bank_transfer', 'shipping', '2026-06-05 14:20:00'),
 (3, 'ORD-20260610-003', 'Khách Hàng Mẫu', '0987654321', '123 Đường Lê Lợi, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh', 780000, 78000, 702000, 'cod', 'processing', '2026-06-10 09:15:00'),
 (3, 'ORD-20260615-004', 'Khách Hàng Mẫu', '0987654321', '123 Đường Lê Lợi, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh', 250000, 0, 250000, 'cod', 'pending', '2026-06-15 16:45:00'),
-(2, 'ORD-20260620-005', 'Trần Tiến Đạt', '0912345678', 'Số 45, phố Hàng Bạc, Phường Hàng Bạc, Quận Hoàn Kiếm, Hà Nội', 1370000, 200000, 1170000, 'bank_transfer', 'pending', '2026-06-20 11:00:00');
+(2, 'ORD-20260620-005', 'Trần Thị Bích Diễm', '0912345678', 'Số 45, phố Hàng Bạc, Phường Hàng Bạc, Quận Hoàn Kiếm, Hà Nội', 1370000, 200000, 1170000, 'bank_transfer', 'pending', '2026-06-20 11:00:00');
 
 
 -- ==========================================

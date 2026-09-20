@@ -3,32 +3,67 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title><?php echo htmlspecialchars(
-      $product["product_name"],
-  ); ?> - LUMIÈRE</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <title><?php echo htmlspecialchars($product["product_name"]); ?> - LUMIÈRE</title>
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
+    rel="stylesheet"
+  >
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+  />
+
   <link rel="stylesheet" href="/assets/css/style.css" />
   <link rel="stylesheet" href="/assets/css/product_details.css" />
+
   <link rel="icon" type="image/png" href="/favicon.png" />
+
   <script>
-      window.USER_LOGGED_IN = <?php echo (isset($_SESSION["user_logged_in"]) && $_SESSION["user_logged_in"] === true) ? 'true' : 'false'; ?>;
+      window.USER_LOGGED_IN =
+          <?php echo (
+              isset($_SESSION["user_logged_in"]) &&
+              $_SESSION["user_logged_in"] === true
+          ) ? "true" : "false"; ?>;
   </script>
 </head>
+
 <body class="bg-cream">
 
-<nav class="navbar navbar-expand-lg py-3 sticky-top border-bottom shadow-sm" style="background-color: #fdfbf7; z-index: 1020;">
+<nav
+  class="navbar navbar-expand-lg py-3 sticky-top border-bottom shadow-sm"
+  style="background-color: #fdfbf7; z-index: 1020;"
+>
     <div class="container-fluid px-4">
-        <a class="navbar-brand fs-4 fw-bold gold-text" href="/index.php?page=home" style="font-family: 'Times New Roman', serif;">LUMIÈRE</a>
 
-        <!-- ICONS: luôn hiện kể cả mobile, đặt TRƯỚC nút toggler -->
+        <a
+          class="navbar-brand fs-4 fw-bold gold-text"
+          href="/index.php?page=home"
+          style="font-family: 'Times New Roman', serif;"
+        >
+            LUMIÈRE
+        </a>
+
         <div class="d-flex gap-3 align-items-center me-2 order-lg-last">
+
             <div class="d-flex align-items-center" style="position: relative;">
-                <input type="text" id="navbarSearchInput" placeholder="Tìm kiếm sản phẩm..." style="
-                    display: <?php echo isset($_GET['search']) && trim($_GET['search']) !== '' ? 'block' : 'none'; ?>;
+
+                <input
+                  type="text"
+                  id="navbarSearchInput"
+                  placeholder="Tìm kiếm sản phẩm..."
+                  style="
+                    display: <?php echo isset($_GET["search"]) && trim($_GET["search"]) !== "" ? "block" : "none"; ?>;
                     border: none;
                     border-bottom: 1px solid #c8a165;
                     background: transparent;
@@ -38,29 +73,68 @@
                     width: 150px;
                     margin-right: 8px;
                     transition: all 0.3s ease;
-                " value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>" />
-                <a href="#" class="text-dark fs-6" id="navbarSearchBtn"><i class="fas fa-search"></i></a>
+                  "
+                  value="<?php echo htmlspecialchars($_GET["search"] ?? ""); ?>"
+                />
+
+                <a
+                  href="#"
+                  class="text-dark fs-6"
+                  id="navbarSearchBtn"
+                >
+                    <i class="fas fa-search"></i>
+                </a>
+
             </div>
-            <a href="#" class="text-dark fs-6"><i class="far fa-heart"></i></a>
-            <a href="/index.php?page=gio_hang" class="text-dark fs-6 position-relative" id="headerCartBtn">
+
+            <a href="#" class="text-dark fs-6">
+                <i class="far fa-heart"></i>
+            </a>
+
+            <a
+              href="/index.php?page=gio_hang"
+              class="text-dark fs-6 position-relative"
+              id="headerCartBtn"
+            >
                 <i class="fas fa-shopping-bag"></i>
-                <span id="headerCartBadge" style="
+
+                <span
+                  id="headerCartBadge"
+                  style="
                     display:none;
                     position:absolute;
-                    top:-8px; right:-10px;
-                    background:#c8a165; color:#fff;
-                    font-size:10px; font-weight:700;
-                    min-width:17px; height:17px;
+                    top:-8px;
+                    right:-10px;
+                    background:#c8a165;
+                    color:#fff;
+                    font-size:10px;
+                    font-weight:700;
+                    min-width:17px;
+                    height:17px;
                     border-radius:50%;
-                    align-items:center; justify-content:center;
+                    align-items:center;
+                    justify-content:center;
                     padding:0 3px;
-                ">0</span>
+                  "
+                >
+                    0
+                </span>
             </a>
+
             <div class="position-relative" id="userDropdownWrapper">
-                <a href="#" class="text-dark fs-6" id="userIconBtn" onclick="toggleUserDropdown(event)">
+
+                <a
+                  href="#"
+                  class="text-dark fs-6"
+                  id="userIconBtn"
+                  onclick="toggleUserDropdown(event)"
+                >
                     <i class="far fa-user"></i>
                 </a>
-                <div id="userDropdownMenu" style="
+
+                <div
+                  id="userDropdownMenu"
+                  style="
                     display: none;
                     position: absolute;
                     top: calc(100% + 12px);
@@ -72,530 +146,1916 @@
                     min-width: 200px;
                     z-index: 9999;
                     overflow: hidden;
-                ">
+                  "
+                >
+
                     <?php if (
                         isset($_SESSION["user_logged_in"]) &&
                         $_SESSION["user_logged_in"] === true
                     ): ?>
-                        <div style="padding: 14px 18px; border-bottom: 1px solid #f0ece4; background: #fcf9f2;">
-                            <p style="margin:0; font-size:12px; color:#888;">Xin chào,</p>
-                            <p style="margin:0; font-weight:bold; font-size:14px; color:#333;">
+
+                        <div
+                          style="
+                            padding: 14px 18px;
+                            border-bottom: 1px solid #f0ece4;
+                            background: #fcf9f2;
+                          "
+                        >
+                            <p
+                              style="
+                                margin:0;
+                                font-size:12px;
+                                color:#888;
+                              "
+                            >
+                                Xin chào,
+                            </p>
+
+                            <p
+                              style="
+                                margin:0;
+                                font-weight:bold;
+                                font-size:14px;
+                                color:#333;
+                              "
+                            >
                                 <?php echo htmlspecialchars(
-                                    $_SESSION["user_name"],
+                                    $_SESSION["user_name"]
                                 ); ?>
                             </p>
                         </div>
-                        <a href="/index.php?page=profile" style="display:flex; align-items:center; gap:10px; padding:12px 18px; text-decoration:none; color:#333; font-size:13px; border-bottom:1px solid #f5f5f5;">
-                            <i class="far fa-user" style="color:#bfa15f; width:16px;"></i> Thông tin cá nhân
+
+                        <a
+                          href="/index.php?page=profile"
+                          style="
+                            display:flex;
+                            align-items:center;
+                            gap:10px;
+                            padding:12px 18px;
+                            text-decoration:none;
+                            color:#333;
+                            font-size:13px;
+                            border-bottom:1px solid #f5f5f5;
+                          "
+                        >
+                            <i
+                              class="far fa-user"
+                              style="color:#bfa15f; width:16px;"
+                            ></i>
+                            Thông tin cá nhân
                         </a>
-                        <?php if (isset($_SESSION["user_role"]) && $_SESSION["user_role"] === "admin"): ?>
-                            <a href="/index.php?page=admin_dashboard" style="display:flex; align-items:center; gap:10px; padding:12px 18px; text-decoration:none; color:#333; font-size:13px; border-bottom:1px solid #f5f5f5;">
-                                <i class="fas fa-user-shield" style="color:#bfa15f; width:16px;"></i> Trang quản trị (Admin)
+
+                        <?php if (
+                            isset($_SESSION["user_role"]) &&
+                            $_SESSION["user_role"] === "admin"
+                        ): ?>
+
+                            <a
+                              href="/index.php?page=admin_dashboard"
+                              style="
+                                display:flex;
+                                align-items:center;
+                                gap:10px;
+                                padding:12px 18px;
+                                text-decoration:none;
+                                color:#333;
+                                font-size:13px;
+                                border-bottom:1px solid #f5f5f5;
+                              "
+                            >
+                                <i
+                                  class="fas fa-user-shield"
+                                  style="color:#bfa15f; width:16px;"
+                                ></i>
+                                Trang quản trị (Admin)
                             </a>
+
                         <?php endif; ?>
-                        <a href="/index.php?page=don_hang" style="display:flex; align-items:center; gap:10px; padding:12px 18px; text-decoration:none; color:#333; font-size:13px; border-bottom:1px solid #f5f5f5;">
-                            <i class="fas fa-box" style="color:#bfa15f; width:16px;"></i> Đơn hàng của tôi
+
+                        <a
+                          href="/index.php?page=don_hang"
+                          style="
+                            display:flex;
+                            align-items:center;
+                            gap:10px;
+                            padding:12px 18px;
+                            text-decoration:none;
+                            color:#333;
+                            font-size:13px;
+                            border-bottom:1px solid #f5f5f5;
+                          "
+                        >
+                            <i
+                              class="fas fa-box"
+                              style="color:#bfa15f; width:16px;"
+                            ></i>
+                            Đơn hàng của tôi
                         </a>
-                        <a href="/index.php?page=change_password" style="display:flex; align-items:center; gap:10px; padding:12px 18px; text-decoration:none; color:#333; font-size:13px; border-bottom:1px solid #f5f5f5;">
-                            <i class="fas fa-lock" style="color:#bfa15f; width:16px;"></i> Đổi mật khẩu
+
+                        <a
+                          href="/index.php?page=change_password"
+                          style="
+                            display:flex;
+                            align-items:center;
+                            gap:10px;
+                            padding:12px 18px;
+                            text-decoration:none;
+                            color:#333;
+                            font-size:13px;
+                            border-bottom:1px solid #f5f5f5;
+                          "
+                        >
+                            <i
+                              class="fas fa-lock"
+                              style="color:#bfa15f; width:16px;"
+                            ></i>
+                            Đổi mật khẩu
                         </a>
-                        <a href="/index.php?page=logout" style="display:flex; align-items:center; gap:10px; padding:12px 18px; text-decoration:none; color:#c0392b; font-size:13px;">
-                            <i class="fas fa-sign-out-alt" style="color:#c0392b; width:16px;"></i> Đăng xuất
+
+                        <a
+                          href="/index.php?page=logout"
+                          style="
+                            display:flex;
+                            align-items:center;
+                            gap:10px;
+                            padding:12px 18px;
+                            text-decoration:none;
+                            color:#c0392b;
+                            font-size:13px;
+                          "
+                        >
+                            <i
+                              class="fas fa-sign-out-alt"
+                              style="color:#c0392b; width:16px;"
+                            ></i>
+                            Đăng xuất
                         </a>
+
                     <?php else: ?>
-                        <a href="/index.php?page=login" style="display:flex; align-items:center; gap:10px; padding:12px 18px; text-decoration:none; color:#333; font-size:13px; border-bottom:1px solid #f5f5f5;">
-                            <i class="fas fa-sign-in-alt" style="color:#bfa15f; width:16px;"></i> Đăng nhập
+
+                        <a
+                          href="/index.php?page=login"
+                          style="
+                            display:flex;
+                            align-items:center;
+                            gap:10px;
+                            padding:12px 18px;
+                            text-decoration:none;
+                            color:#333;
+                            font-size:13px;
+                            border-bottom:1px solid #f5f5f5;
+                          "
+                        >
+                            <i
+                              class="fas fa-sign-in-alt"
+                              style="color:#bfa15f; width:16px;"
+                            ></i>
+                            Đăng nhập
                         </a>
-                        <a href="/index.php?page=register" style="display:flex; align-items:center; gap:10px; padding:12px 18px; text-decoration:none; color:#333; font-size:13px;">
-                            <i class="fas fa-user-plus" style="color:#bfa15f; width:16px;"></i> Tạo tài khoản
+
+                        <a
+                          href="/index.php?page=register"
+                          style="
+                            display:flex;
+                            align-items:center;
+                            gap:10px;
+                            padding:12px 18px;
+                            text-decoration:none;
+                            color:#333;
+                            font-size:13px;
+                          "
+                        >
+                            <i
+                              class="fas fa-user-plus"
+                              style="color:#bfa15f; width:16px;"
+                            ></i>
+                            Tạo tài khoản
                         </a>
+
                     <?php endif; ?>
+
                 </div>
             </div>
         </div>
 
-        <!-- NÚT HAMBURGER -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <!-- MENU: chỉ hiện khi mở collapse trên mobile -->
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav mx-auto text-uppercase" style="font-size: 13px; letter-spacing: 1px;">
-                <li class="nav-item"><a class="nav-link px-3" href="/index.php?page=home">Trang Sức</a></li>
-                <li class="nav-item"><a class="nav-link px-3" href="/index.php?page=home&category_id=1">Trang Sức Cao Cấp</a></li>
-                <li class="nav-item"><a class="nav-link px-3" href="/index.php?page=home#about-us-section">Về Chúng Tôi</a></li>
-                <li class="nav-item"><a class="nav-link px-3" href="/index.php?page=home#contact-section">Liên Hệ</a></li>
+
+            <ul
+              class="navbar-nav mx-auto text-uppercase"
+              style="font-size: 13px; letter-spacing: 1px;"
+            >
+                <li class="nav-item">
+                    <a
+                      class="nav-link px-3"
+                      href="/index.php?page=home"
+                    >
+                        Trang Sức
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a
+                      class="nav-link px-3"
+                      href="/index.php?page=home&category_id=1"
+                    >
+                        Trang Sức Cao Cấp
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a
+                      class="nav-link px-3"
+                      href="/index.php?page=home#about-us-section"
+                    >
+                        Về Chúng Tôi
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a
+                      class="nav-link px-3"
+                      href="/index.php?page=home#contact-section"
+                    >
+                        Liên Hệ
+                    </a>
+                </li>
             </ul>
+
         </div>
     </div>
 </nav>
 
-    <section id="productSection">
 
-        <div id="productGallery">
-                    <div id="mainImageWrapper" style="position:relative;">
-                        <button id="prevBtn" onclick="slideCarousel(-1)" style="
-                            position:absolute; left:10px; top:50%; transform:translateY(-50%);
-                            background:rgba(255,255,255,0.85); border:none; border-radius:50%;
-                            width:36px; height:36px; font-size:18px; cursor:pointer;
-                            z-index:10; box-shadow:0 2px 8px rgba(0,0,0,0.15);
-                            display:none; align-items:center; justify-content:center;
-                        ">‹</button>
+<section id="productSection">
 
-                        <img src="/<?php echo htmlspecialchars(
-                            $product["main_image"],
-                        ); ?>"
-                             alt="<?php echo htmlspecialchars(
-                                 $product["product_name"],
-                             ); ?>"
-                             id="mainProductImage" class="main-product-img"
-                             style="transition: opacity 0.3s ease;"/>
+    <div id="productGallery">
 
-                        <button id="nextBtn" onclick="slideCarousel(1)" style="
-                            position:absolute; right:10px; top:50%; transform:translateY(-50%);
-                            background:rgba(255,255,255,0.85); border:none; border-radius:50%;
-                            width:36px; height:36px; font-size:18px; cursor:pointer;
-                            z-index:10; box-shadow:0 2px 8px rgba(0,0,0,0.15);
-                            display:none; align-items:center; justify-content:center;
-                        ">›</button>
-                    </div>
+        <div id="mainImageWrapper" style="position:relative;">
 
-                    <div id="thumbnailStrip">
-                        <button class="thumb-btn thumb-btn--active"
-                                data-src="/<?php echo htmlspecialchars(
-                                    $product["main_image"],
-                                ); ?>"
-                                data-alt="<?php echo htmlspecialchars(
-                                    $product["product_name"],
-                                ); ?>">
-                            <img src="/<?php echo htmlspecialchars(
-                                $product["main_image"],
-                            ); ?>" alt="Ảnh chính"/>
-                        </button>
-                        <?php foreach ($extraImages as $img): ?>
-                        <button class="thumb-btn"
-                                data-src="/<?php echo htmlspecialchars(
-                                    $img["image_url"],
-                                ); ?>"
-                                data-alt="<?php echo htmlspecialchars(
-                                    $product["product_name"],
-                                ); ?>">
-                            <img src="/<?php echo htmlspecialchars(
-                                $img["image_url"],
-                            ); ?>" alt="Ảnh phụ"/>
-                        </button>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-          <div id="productInfo">
-              <h1 id="productName" class="product-title" style="font-family: 'Times New Roman', serif;">
-                  <?php echo htmlspecialchars($product["product_name"]); ?>
-              </h1>
+            <button
+              id="prevBtn"
+              onclick="slideCarousel(-1)"
+              style="
+                position:absolute;
+                left:10px;
+                top:50%;
+                transform:translateY(-50%);
+                background:rgba(255,255,255,0.85);
+                border:none;
+                border-radius:50%;
+                width:36px;
+                height:36px;
+                font-size:18px;
+                cursor:pointer;
+                z-index:10;
+                box-shadow:0 2px 8px rgba(0,0,0,0.15);
+                display:none;
+                align-items:center;
+                justify-content:center;
+              "
+            >
+                ‹
+            </button>
 
-              <p id="productPrice" class="product-price">
-                  <?php if ($product["sale_price"] > 0): ?>
-                  <span style="color:#c8a165;">
-                          <?php echo number_format(
-                              $product["sale_price"],
-                              0,
-                              ",",
-                              ".",
-                          ); ?>₫
-                      </span>
-                      <span style="text-decoration:line-through; color:#999; font-size:16px; margin-left:10px;">
-                          <?php echo number_format(
-                              $product["price"],
-                              0,
-                              ",",
-                              ".",
-                          ); ?>₫
-                      </span>
-                  <?php else: ?>
-                      <?php echo number_format(
-                          $product["price"],
-                          0,
-                          ",",
-                          ".",
-                      ); ?>₫
-                  <?php endif; ?>
-              </p>
+            <img
+              src="/<?php echo htmlspecialchars($product["main_image"]); ?>"
+              alt="<?php echo htmlspecialchars($product["product_name"]); ?>"
+              id="mainProductImage"
+              class="main-product-img"
+              style="transition: opacity 0.3s ease;"
+            />
 
-              <p id="productDescription" class="product-desc">
-                  <?php echo htmlspecialchars($product["description"]); ?>
-              </p>
+            <button
+              id="nextBtn"
+              onclick="slideCarousel(1)"
+              style="
+                position:absolute;
+                right:10px;
+                top:50%;
+                transform:translateY(-50%);
+                background:rgba(255,255,255,0.85);
+                border:none;
+                border-radius:50%;
+                width:36px;
+                height:36px;
+                font-size:18px;
+                cursor:pointer;
+                z-index:10;
+                box-shadow:0 2px 8px rgba(0,0,0,0.15);
+                display:none;
+                align-items:center;
+                justify-content:center;
+              "
+            >
+                ›
+            </button>
 
-              <!-- Thông tin nhanh -->
-              <div style="background:#fcf9f2; border-radius:8px; padding:16px 20px; margin:20px 0; font-size:13px;">
-                  <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0ece4;">
-                      <span style="color:#888;">Tình trạng</span>
-                      <span style="font-weight:bold; color:<?php echo $product[
-                          "stock_quantity"
-                      ] > 0
-                          ? "#27ae60"
-                          : "#c0392b"; ?>;">
-                          <?php echo $product["stock_quantity"] > 0
-                              ? "✓ Còn hàng (" .
-                                  $product["stock_quantity"] .
-                                  " sản phẩm)"
-                              : "✗ Hết hàng"; ?>
-                      </span>
-                  </div>
-                  <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0ece4;">
-                      <span style="color:#888;">Danh mục</span>
-                      <span style="font-weight:bold;"><?php echo htmlspecialchars(
-                          $product["category_name"],
-                      ); ?></span>
-                  </div>
-                  <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0ece4;">
-                      <span style="color:#888;">Mã sản phẩm</span>
-                      <span style="font-weight:bold; font-family:monospace;">
-                          #<?php echo str_pad(
-                              $product["product_id"],
-                              4,
-                              "0",
-                              STR_PAD_LEFT,
-                          ); ?>
-                      </span>
-                  </div>
-                  <div style="display:flex; justify-content:space-between; padding:8px 0;">
-                      <span style="color:#888;">Cập nhật</span>
-                      <span style="font-weight:bold;">
-                          <?php echo date(
-                              "d/m/Y",
-                              strtotime($product["updated_at"]),
-                          ); ?>
-                      </span>
-                  </div>
-              </div>
-
-              <!-- Nút hành động -->
-              <div id="productActions">
-                  <button id="btnAddToCart" class="btn-primary w-100 mb-2">
-                      <i class="fas fa-shopping-bag me-2"></i>THÊM VÀO GIỎ HÀNG
-                  </button>
-                  <!-- Thêm nút này -->
-                  <a href="/index.php?page=thanh_toan"
-                     id="btnBuyNow"
-                     class="btn-primary w-100 mb-2"
-                     style="display:block; text-align:center; text-decoration:none; background-color:#333; padding:12px;">
-                      <i class="fas fa-bolt me-2"></i>MUA NGAY
-                  </a>
-                  <button id="btnAddToWishlist" class="btn-secondary w-100 bg-transparent border-0 d-flex align-items-center justify-content-center gap-2">
-                      <i class="far fa-heart"></i> Lưu vào yêu thích
-                  </button>
-              </div>
-
-              <!-- Accordion chi tiết -->
-              <div id="productAccordion">
-                  <div class="accordion-item">
-                      <button class="accordion-trigger" data-target="panelDetails">
-                          CHI TIẾT & KÍCH THƯỚC
-                          <span class="accordion-icon">+</span>
-                      </button>
-                      <div class="accordion-panel" id="panelDetails">
-                          <p><?php echo nl2br(
-                              htmlspecialchars($product["description"]),
-                          ); ?></p>
-                          <p>Tồn kho: <?php echo $product[
-                              "stock_quantity"
-                          ]; ?> sản phẩm</p>
-                      </div>
-                  </div>
-                  <div class="accordion-item">
-                      <button class="accordion-trigger" data-target="panelShipping">
-                          VẬN CHUYỂN & ĐỔI TRẢ
-                          <span class="accordion-icon">+</span>
-                      </button>
-                      <div class="accordion-panel" id="panelShipping">
-                          <p>Miễn phí vận chuyển toàn quốc. Giao hàng trong 3–5 ngày làm việc. Đổi trả trong vòng 14 ngày kể từ ngày nhận hàng với sản phẩm chưa qua sử dụng.</p>
-                      </div>
-                  </div>
-              </div>
-
-
-      </div>
-    </section>
-
-    <!-- ================= REVIEWS SECTION ================= -->
-    <section class="reviews-section container-fluid px-5 my-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <div class="border-top pt-5">
-                    <h3 class="mb-4 text-center text-uppercase" style="font-family: 'Times New Roman', serif; letter-spacing: 2px; color: #a47e4b; font-weight: normal;">ĐÁNH GIÁ TỪ KHÁCH HÀNG</h3>
-                    
-                    <?php 
-                    $totalReviews = count($reviewsList);
-                    $avgRating = 0;
-                    if ($totalReviews > 0) {
-                        $sum = 0;
-                        foreach ($reviewsList as $r) {
-                            $sum += $r['rating'];
-                        }
-                        $avgRating = round($sum / $totalReviews, 1);
-                    }
-                    ?>
-
-                    <!-- Review summary card -->
-                    <div class="row align-items-center mb-5 p-4 rounded-3" style="background-color: #fcf9f2;">
-                        <div class="col-md-4 text-center border-end mb-3 mb-md-0" style="border-color: #e6dfd3 !important;">
-                            <h1 class="display-4 fw-bold" style="font-family: 'Times New Roman', serif; color: #c8a165; margin-bottom: 5px;">
-                                <?php echo $avgRating > 0 ? sprintf("%.1f", $avgRating) : '0.0'; ?>
-                            </h1>
-                            <div class="mb-2 text-warning" style="font-size: 16px;">
-                                <?php 
-                                $fullStars = floor($avgRating);
-                                $halfStar = ($avgRating - $fullStars) >= 0.5 ? 1 : 0;
-                                $emptyStars = 5 - $fullStars - $halfStar;
-                                for ($i = 0; $i < $fullStars; $i++) {
-                                    echo '<i class="fas fa-star"></i>';
-                                }
-                                if ($halfStar) {
-                                    echo '<i class="fas fa-star-half-alt"></i>';
-                                }
-                                for ($i = 0; $i < $emptyStars; $i++) {
-                                    echo '<i class="far fa-star"></i>';
-                                }
-                                ?>
-                            </div>
-                            <p class="text-muted small mb-0">Dựa trên <?php echo $totalReviews; ?> đánh giá</p>
-                        </div>
-                        <div class="col-md-8 ps-md-4">
-                            <h5 class="fw-bold mb-3" style="font-size: 14px; color: #333;">Phân tích xếp hạng</h5>
-                            <?php 
-                            $starsCount = [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0];
-                            foreach ($reviewsList as $r) {
-                                $starsCount[$r['rating']]++;
-                            }
-                            for ($i = 5; $i >= 1; $i--):
-                                $pct = $totalReviews > 0 ? round(($starsCount[$i] / $totalReviews) * 100) : 0;
-                            ?>
-                            <div class="d-flex align-items-center gap-2 mb-1" style="font-size: 12px; color: #555;">
-                                <span style="min-width: 45px; text-align: right;"><?php echo $i; ?> sao</span>
-                                <div class="progress flex-grow-1" style="height: 6px; background-color: #f0ece4; border-radius: 3px;">
-                                    <div class="progress-bar" role="progressbar" style="width: <?php echo $pct; ?>%; background-color: #c8a165; border-radius: 3px;" aria-valuenow="<?php echo $pct; ?>" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                                <span class="text-muted" style="min-width: 35px;"><?php echo $pct; ?>%</span>
-                            </div>
-                            <?php endfor; ?>
-                        </div>
-                    </div>
-
-                    <!-- Reviews List -->
-                    <div class="reviews-list">
-                        <?php if ($totalReviews > 0): ?>
-                            <div class="d-flex flex-column gap-4">
-                                <?php foreach ($reviewsList as $r): ?>
-                                    <div class="review-item border-bottom pb-4" style="border-color: #f0ece4 !important;">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <div>
-                                                <span class="fw-bold me-2" style="font-size: 14px; color: #333;"><?php echo htmlspecialchars($r['full_name']); ?></span>
-                                                <span class="text-warning" style="font-size: 11px;">
-                                                    <?php 
-                                                    for ($s = 0; $s < $r['rating']; $s++) {
-                                                        echo '<i class="fas fa-star"></i>';
-                                                    }
-                                                    for ($s = 0; $s < (5 - $r['rating']); $s++) {
-                                                        echo '<i class="far fa-star"></i>';
-                                                    }
-                                                    ?>
-                                                </span>
-                                            </div>
-                                            <small class="text-muted" style="font-size: 11px;">
-                                                <?php echo date('d/m/Y', strtotime($r['created_at'])); ?>
-                                            </small>
-                                        </div>
-                                        <p class="mb-0 text-dark small" style="line-height: 1.7; color: #444 !important;">
-                                            <?php echo nl2br(htmlspecialchars($r['comment'])); ?>
-                                        </p>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php else: ?>
-                            <div class="text-center py-5 text-muted" style="background-color: #fcf9f2; border-radius: 8px;">
-                                <i class="far fa-star fs-2 mb-3" style="color: #c8a165; opacity: 0.6;"></i>
-                                <p class="small mb-0">Chưa có đánh giá nào cho sản phẩm này.</p>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-  </main>
-
-  <aside id="cartDrawer" class="cart-drawer" aria-label="Giỏ hàng" aria-hidden="true">
-    <div id="cartDrawerInner">
-      <div id="cartDrawerHeader">
-        <h2 id="cartDrawerTitle">Giỏ Hàng Của Bạn</h2>
-        <button id="btnCloseCart" aria-label="Đóng giỏ hàng" style="background:none; border:none; font-size:20px;">✕</button>
-      </div>
-
-      <div id="cartItemList">
         </div>
 
-      <div id="cartDrawerFooter">
-        <div id="cartSubtotalRow" class="d-flex justify-content-between mb-2">
-          <span>Tạm tính</span>
-          <span id="cartSubtotalAmount" class="fw-bold">3.450.000₫</span>
+        <div id="thumbnailStrip">
+
+            <button
+              class="thumb-btn thumb-btn--active"
+              data-src="/<?php echo htmlspecialchars($product["main_image"]); ?>"
+              data-alt="<?php echo htmlspecialchars($product["product_name"]); ?>"
+            >
+                <img
+                  src="/<?php echo htmlspecialchars($product["main_image"]); ?>"
+                  alt="Ảnh chính"
+                />
+            </button>
+
+            <?php foreach ($extraImages as $img): ?>
+
+                <button
+                  class="thumb-btn"
+                  data-src="/<?php echo htmlspecialchars($img["image_url"]); ?>"
+                  data-alt="<?php echo htmlspecialchars($product["product_name"]); ?>"
+                >
+                    <img
+                      src="/<?php echo htmlspecialchars($img["image_url"]); ?>"
+                      alt="Ảnh phụ"
+                    />
+                </button>
+
+            <?php endforeach; ?>
+
         </div>
-        <p class="cart-tax-note text-muted" style="font-size: 12px;">Phí vận chuyển và thuế sẽ được tính khi thanh toán.</p>
-        <button id="btnProceedToCheckout" class="btn-primary btn-checkout w-100 py-2">TIẾN HÀNH THANH TOÁN</button>
-        <a href="/index.php?page=gio_hang" style="
-            display:block; text-align:center; margin-top:12px;
-            font-size:11px; letter-spacing:1px; color:#7a7670;
-            text-decoration:underline; text-underline-offset:3px;
-        ">Xem giỏ hàng đầy đủ →</a>
-      </div>
+
     </div>
-  </aside>
-  <div id="cartOverlay" class="cart-overlay"></div>
 
-  <footer class="pt-5 pb-3 border-top mt-5" style="background-color: #fcf9f2;">
-      <div class="container-fluid px-5">
-          <div class="row">
-              <div class="col-md-4 mb-4">
-                  <h4 class="fw-bold gold-text mb-3" style="font-family: 'Times New Roman', serif;">LUMIÈRE</h4>
-                  <p class="text-muted small w-75">Điểm đến của những tuyệt tác trang sức thủ công. Kiến tạo vẻ đẹp vượt thời gian.</p>
-                  <p class="small text-muted mt-4">&copy; 2026 LUMIÈRE. Bản quyền thuộc về Nhóm 6.</p>
-              </div>
-              <div class="col-md-2 mb-4">
-                  <h6 class="text-uppercase mb-3 fw-bold" style="font-size: 12px;">Công Ty</h6>
-                  <ul class="list-unstyled text-muted small">
-                      <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Về Chúng Tôi</a></li>
-                      <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Bộ Sưu Tập</a></li>
-                      <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Tuyển Dụng</a></li>
-                  </ul>
-              </div>
-              <div class="col-md-3 mb-4">
-                  <h6 class="text-uppercase mb-3 fw-bold" style="font-size: 12px;">Hỗ Trợ Khách Hàng</h6>
-                  <ul class="list-unstyled text-muted small">
-                      <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Giao Hàng & Đổi Trả</a></li>
-                      <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Chính Sách Bảo Mật</a></li>
-                      <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Liên Hệ</a></li>
-                  </ul>
-              </div>
-              <div class="col-md-3 mb-4">
-                  <h6 class="text-uppercase mb-3 fw-bold" style="font-size: 12px;">Kết Nối</h6>
-                  <ul class="list-unstyled text-muted small">
-                      <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Facebook</a></li>
-                      <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Instagram</a></li>
-                      <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Pinterest</a></li>
-                  </ul>
-              </div>
-          </div>
-      </div>
-  </footer>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-  // ===== CAROUSEL =====
-  const allImages = [
-      { src: '/<?php echo $product[
-          "main_image"
-      ]; ?>', alt: '<?php echo addslashes($product["product_name"]); ?>' },
-      <?php foreach ($extraImages as $img): ?>
-      { src: '/<?php echo htmlspecialchars(
-          $img["image_url"],
-      ); ?>', alt: '<?php echo addslashes($product["product_name"]); ?>' },
-      <?php endforeach; ?>
-  ];
 
-  let currentIndex = 0;
+    <div id="productInfo">
 
-  function slideCarousel(dir) {
-      currentIndex = (currentIndex + dir + allImages.length) % allImages.length;
-      goToSlide(currentIndex);
-  }
+        <h1
+          id="productName"
+          class="product-title"
+          style="font-family: 'Times New Roman', serif;"
+        >
+            <?php echo htmlspecialchars($product["product_name"]); ?>
+        </h1>
 
-  function goToSlide(index) {
-      currentIndex = index;
-      const mainImg = document.getElementById('mainProductImage');
+        <p id="productPrice" class="product-price">
 
-      // Fade effect
-      mainImg.style.opacity = '0';
-      setTimeout(() => {
-          mainImg.src = allImages[index].src;
-          mainImg.alt = allImages[index].alt;
-          mainImg.style.opacity = '1';
-      }, 150);
+            <?php if ($product["sale_price"] > 0): ?>
 
-      // Cập nhật thumbnail active
-      document.querySelectorAll('.thumb-btn').forEach((btn, i) => {
-          btn.classList.toggle('thumb-btn--active', i === index);
-      });
-  }
+                <span style="color:#c8a165;">
+                    <?php echo number_format(
+                        $product["sale_price"],
+                        0,
+                        ",",
+                        "."
+                    ); ?>₫
+                </span>
 
-  // Gắn sự kiện click thumbnail - dùng goToSlide để đồng bộ currentIndex
-  thumbnailStrip.addEventListener('click', (e) => {
-      const btn = e.target.closest('.thumb-btn');
-      if (!btn) return;
-      const idx = [...thumbnailStrip.querySelectorAll('.thumb-btn')].indexOf(btn);
-      if (idx !== -1) goToSlide(idx);
-  });
+                <span
+                  style="
+                    text-decoration:line-through;
+                    color:#999;
+                    font-size:16px;
+                    margin-left:10px;
+                  "
+                >
+                    <?php echo number_format(
+                        $product["price"],
+                        0,
+                        ",",
+                        "."
+                    ); ?>₫
+                </span>
 
-  // Hiện mũi tên nếu có nhiều hơn 1 ảnh
-  if (allImages.length > 1) {
-      document.getElementById('prevBtn').style.display = 'flex';
-      document.getElementById('nextBtn').style.display = 'flex';
-  }
+            <?php else: ?>
 
-  // Swipe trên mobile
-  let touchStartX = 0;
-  document.getElementById('mainImageWrapper').addEventListener('touchstart', e => {
-      touchStartX = e.touches[0].clientX;
-  });
-  document.getElementById('mainImageWrapper').addEventListener('touchend', e => {
-      const diff = touchStartX - e.changedTouches[0].clientX;
-      if (Math.abs(diff) > 50) slideCarousel(diff > 0 ? 1 : -1);
-  });
-  document.getElementById('btnBuyNow').addEventListener('click', function(e) {
-      e.preventDefault();
+                <?php echo number_format(
+                    $product["price"],
+                    0,
+                    ",",
+                    "."
+                ); ?>₫
 
-      const item = {
-          id:         productDetail.id,
-          name:       productDetail.name,
-          metal:      productDetail.metal,
-          metalLabel: productDetail.metalLabels[productDetail.metal],
-          price:      productDetail.price,
-          image:      document.getElementById('mainProductImage').src,
-          quantity:   1
-      };
+            <?php endif; ?>
 
-      // Chỉ lưu riêng sản phẩm này, không ảnh hưởng giỏ hàng
-      sessionStorage.setItem('checkout_items', JSON.stringify([item]));
+        </p>
 
-      window.location.href = '/index.php?page=thanh_toan';
-  });
-  </script>
-  <script>
-  const productDetail = {
-      id:    '<?php echo $product["product_id"]; ?>',
-      name:  '<?php echo addslashes($product["product_name"]); ?>',
-      price: <?php echo $product["sale_price"] > 0
-          ? $product["sale_price"]
-          : $product["price"]; ?>,
-      metal: 'default',
-      metalLabels: { 'default': 'Mặc định' },
-      images: { main: '/<?php echo $product["main_image"]; ?>' },
-  };
-  </script>
-  <script>
-  function toggleUserDropdown(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      const menu = document.getElementById('userDropdownMenu');
-      menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-  }
+        <p id="productDescription" class="product-desc">
+            <?php echo htmlspecialchars($product["description"]); ?>
+        </p>
 
-  document.addEventListener('click', function(e) {
-      const wrapper = document.getElementById('userDropdownWrapper');
-      if (wrapper && !wrapper.contains(e.target)) {
-          document.getElementById('userDropdownMenu').style.display = 'none';
-      }
-  });
-  </script>
-  <script src="/assets/js/cart.js"></script>
-  <script src="/assets/js/product_details.js"></script>
-  <script src="/assets/js/chat.js"></script>
+
+        <div
+          style="
+            background:#fcf9f2;
+            border-radius:8px;
+            padding:16px 20px;
+            margin:20px 0;
+            font-size:13px;
+          "
+        >
+
+            <div
+              style="
+                display:flex;
+                justify-content:space-between;
+                padding:8px 0;
+                border-bottom:1px solid #f0ece4;
+              "
+            >
+                <span style="color:#888;">Tình trạng</span>
+
+                <span
+                  style="
+                    font-weight:bold;
+                    color:<?php echo $product["stock_quantity"] > 0
+                        ? "#27ae60"
+                        : "#c0392b"; ?>;
+                  "
+                >
+                    <?php echo $product["stock_quantity"] > 0
+                        ? "✓ Còn hàng (" .
+                            $product["stock_quantity"] .
+                            " sản phẩm)"
+                        : "✗ Hết hàng"; ?>
+                </span>
+            </div>
+
+            <div
+              style="
+                display:flex;
+                justify-content:space-between;
+                padding:8px 0;
+                border-bottom:1px solid #f0ece4;
+              "
+            >
+                <span style="color:#888;">Danh mục</span>
+
+                <span style="font-weight:bold;">
+                    <?php echo htmlspecialchars($product["category_name"]); ?>
+                </span>
+            </div>
+
+            <div
+              style="
+                display:flex;
+                justify-content:space-between;
+                padding:8px 0;
+                border-bottom:1px solid #f0ece4;
+              "
+            >
+                <span style="color:#888;">Mã sản phẩm</span>
+
+                <span
+                  style="
+                    font-weight:bold;
+                    font-family:monospace;
+                  "
+                >
+                    #<?php echo str_pad(
+                        $product["product_id"],
+                        4,
+                        "0",
+                        STR_PAD_LEFT
+                    ); ?>
+                </span>
+            </div>
+
+            <div
+              style="
+                display:flex;
+                justify-content:space-between;
+                padding:8px 0;
+              "
+            >
+                <span style="color:#888;">Cập nhật</span>
+
+                <span style="font-weight:bold;">
+                    <?php echo date(
+                        "d/m/Y",
+                        strtotime($product["updated_at"])
+                    ); ?>
+                </span>
+            </div>
+
+        </div>
+
+
+        <div id="productActions">
+
+            <button
+              id="btnAddToCart"
+              class="btn-primary w-100 mb-2"
+            >
+                <i class="fas fa-shopping-bag me-2"></i>
+                THÊM VÀO GIỎ HÀNG
+            </button>
+
+            <a
+              href="/index.php?page=thanh_toan"
+              id="btnBuyNow"
+              class="btn-primary w-100 mb-2"
+              style="
+                display:block;
+                text-align:center;
+                text-decoration:none;
+                background-color:#333;
+                padding:12px;
+              "
+            >
+                <i class="fas fa-bolt me-2"></i>
+                MUA NGAY
+            </a>
+
+            <button
+              id="btnAddToWishlist"
+              class="btn-secondary w-100 bg-transparent border-0 d-flex align-items-center justify-content-center gap-2"
+            >
+                <i class="far fa-heart"></i>
+                Lưu vào yêu thích
+            </button>
+
+        </div>
+
+
+        <div id="productAccordion">
+
+            <div class="accordion-item">
+
+                <button
+                  class="accordion-trigger"
+                  data-target="panelDetails"
+                >
+                    CHI TIẾT & KÍCH THƯỚC
+                    <span class="accordion-icon">+</span>
+                </button>
+
+                <div
+                  class="accordion-panel"
+                  id="panelDetails"
+                >
+                    <p>
+                        <?php echo nl2br(
+                            htmlspecialchars($product["description"])
+                        ); ?>
+                    </p>
+
+                    <p>
+                        Tồn kho:
+                        <?php echo $product["stock_quantity"]; ?>
+                        sản phẩm
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="accordion-item">
+
+                <button
+                  class="accordion-trigger"
+                  data-target="panelShipping"
+                >
+                    VẬN CHUYỂN & ĐỔI TRẢ
+                    <span class="accordion-icon">+</span>
+                </button>
+
+                <div
+                  class="accordion-panel"
+                  id="panelShipping"
+                >
+                    <p>
+                        Miễn phí vận chuyển toàn quốc.
+                        Giao hàng trong 3–5 ngày làm việc.
+                        Đổi trả trong vòng 14 ngày kể từ ngày nhận hàng
+                        với sản phẩm chưa qua sử dụng.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= REVIEWS SECTION ================= -->
+
+<section class="reviews-section container-fluid px-5 my-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-10">
+
+            <div class="border-top pt-5">
+
+                <h3
+                  class="mb-4 text-center text-uppercase"
+                  style="
+                    font-family:'Times New Roman', serif;
+                    letter-spacing:2px;
+                    color:#a47e4b;
+                    font-weight:normal;
+                  "
+                >
+                    ĐÁNH GIÁ TỪ KHÁCH HÀNG
+                </h3>
+
+
+                <?php
+                $totalReviews = count($reviewsList);
+                $avgRating = 0;
+
+                if ($totalReviews > 0) {
+                    $sum = 0;
+
+                    foreach ($reviewsList as $r) {
+                        $sum += (int) $r["rating"];
+                    }
+
+                    $avgRating = round(
+                        $sum / $totalReviews,
+                        1
+                    );
+                }
+
+                $reviewMessage = $_GET["review"] ?? "";
+                ?>
+
+
+                <!-- THÔNG BÁO REVIEW -->
+
+                <?php if ($reviewMessage === "success"): ?>
+
+                    <div
+                      class="alert alert-success text-center"
+                      style="
+                        border-radius:8px;
+                        font-size:13px;
+                      "
+                    >
+                        <i class="fas fa-check-circle me-2"></i>
+                        Đánh giá của bạn đã được gửi thành công.
+                        Vui lòng chờ quản trị viên duyệt trước khi hiển thị.
+                    </div>
+
+                <?php elseif ($reviewMessage === "exists"): ?>
+
+                    <div
+                      class="alert alert-warning text-center"
+                      style="
+                        border-radius:8px;
+                        font-size:13px;
+                      "
+                    >
+                        <i class="fas fa-info-circle me-2"></i>
+                        Bạn đã đánh giá sản phẩm này rồi.
+                    </div>
+
+                <?php elseif ($reviewMessage === "empty"): ?>
+
+                    <div
+                      class="alert alert-danger text-center"
+                      style="
+                        border-radius:8px;
+                        font-size:13px;
+                      "
+                    >
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Vui lòng nhập nội dung đánh giá.
+                    </div>
+
+                <?php elseif ($reviewMessage === "invalid"): ?>
+
+                    <div
+                      class="alert alert-danger text-center"
+                      style="
+                        border-radius:8px;
+                        font-size:13px;
+                      "
+                    >
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Số sao đánh giá không hợp lệ.
+                    </div>
+
+                <?php elseif ($reviewMessage === "error"): ?>
+
+                    <div
+                      class="alert alert-danger text-center"
+                      style="
+                        border-radius:8px;
+                        font-size:13px;
+                      "
+                    >
+                        <i class="fas fa-times-circle me-2"></i>
+                        Không thể gửi đánh giá. Vui lòng thử lại sau.
+                    </div>
+
+                <?php endif; ?>
+
+
+                <!-- REVIEW SUMMARY -->
+
+                <div
+                  class="row align-items-center mb-5 p-4 rounded-3"
+                  style="background-color:#fcf9f2;"
+                >
+
+                    <div
+                      class="col-md-4 text-center border-end mb-3 mb-md-0"
+                      style="
+                        border-color:#e6dfd3 !important;
+                      "
+                    >
+
+                        <h1
+                          class="display-4 fw-bold"
+                          style="
+                            font-family:'Times New Roman', serif;
+                            color:#c8a165;
+                            margin-bottom:5px;
+                          "
+                        >
+                            <?php echo $avgRating > 0
+                                ? sprintf("%.1f", $avgRating)
+                                : "0.0"; ?>
+                        </h1>
+
+                        <div
+                          class="mb-2 text-warning"
+                          style="font-size:16px;"
+                        >
+
+                            <?php
+                            $fullStars = floor($avgRating);
+                            $halfStar =
+                                ($avgRating - $fullStars) >= 0.5
+                                    ? 1
+                                    : 0;
+
+                            $emptyStars =
+                                5 -
+                                $fullStars -
+                                $halfStar;
+
+                            for (
+                                $i = 0;
+                                $i < $fullStars;
+                                $i++
+                            ) {
+                                echo '<i class="fas fa-star"></i>';
+                            }
+
+                            if ($halfStar) {
+                                echo '<i class="fas fa-star-half-alt"></i>';
+                            }
+
+                            for (
+                                $i = 0;
+                                $i < $emptyStars;
+                                $i++
+                            ) {
+                                echo '<i class="far fa-star"></i>';
+                            }
+                            ?>
+
+                        </div>
+
+                        <p class="text-muted small mb-0">
+                            Dựa trên
+                            <?php echo $totalReviews; ?>
+                            đánh giá
+                        </p>
+
+                    </div>
+
+
+                    <div class="col-md-8 ps-md-4">
+
+                        <h5
+                          class="fw-bold mb-3"
+                          style="
+                            font-size:14px;
+                            color:#333;
+                          "
+                        >
+                            Phân tích xếp hạng
+                        </h5>
+
+                        <?php
+                        $starsCount = [
+                            5 => 0,
+                            4 => 0,
+                            3 => 0,
+                            2 => 0,
+                            1 => 0
+                        ];
+
+                        foreach ($reviewsList as $r) {
+                            $ratingValue = (int) $r["rating"];
+
+                            if (isset($starsCount[$ratingValue])) {
+                                $starsCount[$ratingValue]++;
+                            }
+                        }
+
+                        for ($i = 5; $i >= 1; $i--):
+
+                            $pct =
+                                $totalReviews > 0
+                                    ? round(
+                                        ($starsCount[$i] / $totalReviews) * 100
+                                    )
+                                    : 0;
+                        ?>
+
+                            <div
+                              class="d-flex align-items-center gap-2 mb-1"
+                              style="
+                                font-size:12px;
+                                color:#555;
+                              "
+                            >
+
+                                <span
+                                  style="
+                                    min-width:45px;
+                                    text-align:right;
+                                  "
+                                >
+                                    <?php echo $i; ?> sao
+                                </span>
+
+                                <div
+                                  class="progress flex-grow-1"
+                                  style="
+                                    height:6px;
+                                    background-color:#f0ece4;
+                                    border-radius:3px;
+                                  "
+                                >
+
+                                    <div
+                                      class="progress-bar"
+                                      role="progressbar"
+                                      style="
+                                        width:<?php echo $pct; ?>%;
+                                        background-color:#c8a165;
+                                        border-radius:3px;
+                                      "
+                                      aria-valuenow="<?php echo $pct; ?>"
+                                      aria-valuemin="0"
+                                      aria-valuemax="100"
+                                    ></div>
+
+                                </div>
+
+                                <span
+                                  class="text-muted"
+                                  style="min-width:35px;"
+                                >
+                                    <?php echo $pct; ?>%
+                                </span>
+
+                            </div>
+
+                        <?php endfor; ?>
+
+                    </div>
+
+                </div>
+
+
+                <!-- FORM ĐÁNH GIÁ -->
+
+                <div
+                  class="review-form mb-5 p-4 rounded-3"
+                  style="
+                    background:#fff;
+                    border:1px solid #eee7dc;
+                  "
+                >
+
+                    <h5
+                      class="fw-bold mb-3"
+                      style="
+                        font-family:'Times New Roman', serif;
+                        color:#a47e4b;
+                      "
+                    >
+                        VIẾT ĐÁNH GIÁ CỦA BẠN
+                    </h5>
+
+
+                    <?php if (
+                        isset($_SESSION["user_logged_in"]) &&
+                        $_SESSION["user_logged_in"] === true
+                    ): ?>
+
+                        <form
+                          method="POST"
+                          action="/index.php?page=submit_review"
+                        >
+
+                            <input
+                              type="hidden"
+                              name="product_id"
+                              value="<?php echo (int) $product["product_id"]; ?>"
+                            >
+
+
+                            <div class="mb-3">
+
+                                <label
+                                  class="form-label"
+                                  style="
+                                    font-size:13px;
+                                    font-weight:600;
+                                  "
+                                >
+                                    Đánh giá
+                                </label>
+
+                                <div
+                                  class="review-rating-input"
+                                  style="
+                                    display:flex;
+                                    gap:8px;
+                                  "
+                                >
+
+                                    <?php for ($star = 1; $star <= 5; $star++): ?>
+
+                                        <label
+                                          style="
+                                            cursor:pointer;
+                                            font-size:25px;
+                                            color:#c8a165;
+                                          "
+                                        >
+
+                                            <input
+                                              type="radio"
+                                              name="rating"
+                                              value="<?php echo $star; ?>"
+                                              required
+                                              style="display:none;"
+                                            >
+
+                                            <i
+                                              class="far fa-star review-star"
+                                              data-rating="<?php echo $star; ?>"
+                                            ></i>
+
+                                        </label>
+
+                                    <?php endfor; ?>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="mb-3">
+
+                                <label
+                                  for="reviewComment"
+                                  class="form-label"
+                                  style="
+                                    font-size:13px;
+                                    font-weight:600;
+                                  "
+                                >
+                                    Nội dung đánh giá
+                                </label>
+
+                                <textarea
+                                  id="reviewComment"
+                                  name="comment"
+                                  class="form-control"
+                                  rows="4"
+                                  maxlength="1000"
+                                  required
+                                  placeholder="Hãy chia sẻ cảm nhận của bạn về sản phẩm..."
+                                  style="
+                                    border-color:#e6dfd3;
+                                    resize:vertical;
+                                    font-size:13px;
+                                  "
+                                ></textarea>
+
+                            </div>
+
+
+                            <button
+                              type="submit"
+                              class="btn-primary"
+                              style="
+                                border:none;
+                                padding:11px 25px;
+                                letter-spacing:1px;
+                                font-size:12px;
+                              "
+                            >
+                                <i class="fas fa-paper-plane me-2"></i>
+                                GỬI ĐÁNH GIÁ
+                            </button>
+
+                            <p
+                              class="text-muted mt-2 mb-0"
+                              style="font-size:11px;"
+                            >
+                                Đánh giá sẽ được hiển thị sau khi quản trị viên duyệt.
+                            </p>
+
+                        </form>
+
+                    <?php else: ?>
+
+                        <div
+                          class="text-center py-3"
+                          style="
+                            background:#fcf9f2;
+                            border-radius:8px;
+                          "
+                        >
+
+                            <i
+                              class="far fa-user mb-2"
+                              style="
+                                color:#c8a165;
+                                font-size:22px;
+                              "
+                            ></i>
+
+                            <p
+                              class="mb-2"
+                              style="
+                                font-size:13px;
+                                color:#666;
+                              "
+                            >
+                                Bạn cần đăng nhập để viết đánh giá.
+                            </p>
+
+                            <a
+                              href="/index.php?page=login"
+                              style="
+                                color:#a47e4b;
+                                font-size:13px;
+                                font-weight:600;
+                                text-decoration:none;
+                              "
+                            >
+                                ĐĂNG NHẬP NGAY
+                            </a>
+
+                        </div>
+
+                    <?php endif; ?>
+
+                </div>
+
+
+                <!-- REVIEWS LIST -->
+
+                <div class="reviews-list">
+
+                    <?php if ($totalReviews > 0): ?>
+
+                        <div class="d-flex flex-column gap-4">
+
+                            <?php foreach ($reviewsList as $r): ?>
+
+                                <div
+                                  class="review-item border-bottom pb-4"
+                                  style="
+                                    border-color:#f0ece4 !important;
+                                  "
+                                >
+
+                                    <div
+                                      class="d-flex justify-content-between align-items-center mb-2"
+                                    >
+
+                                        <div>
+
+                                            <span
+                                              class="fw-bold me-2"
+                                              style="
+                                                font-size:14px;
+                                                color:#333;
+                                              "
+                                            >
+                                                <?php echo htmlspecialchars(
+                                                    $r["full_name"]
+                                                ); ?>
+                                            </span>
+
+                                            <span
+                                              class="text-warning"
+                                              style="font-size:11px;"
+                                            >
+
+                                                <?php
+                                                $rating = (int) $r["rating"];
+
+                                                for (
+                                                    $s = 0;
+                                                    $s < $rating;
+                                                    $s++
+                                                ) {
+                                                    echo '<i class="fas fa-star"></i>';
+                                                }
+
+                                                for (
+                                                    $s = 0;
+                                                    $s < 5 - $rating;
+                                                    $s++
+                                                ) {
+                                                    echo '<i class="far fa-star"></i>';
+                                                }
+                                                ?>
+
+                                            </span>
+
+                                        </div>
+
+
+                                        <small
+                                          class="text-muted"
+                                          style="font-size:11px;"
+                                        >
+                                            <?php echo date(
+                                                "d/m/Y",
+                                                strtotime($r["created_at"])
+                                            ); ?>
+                                        </small>
+
+                                    </div>
+
+
+                                    <p
+                                      class="mb-0 text-dark small"
+                                      style="
+                                        line-height:1.7;
+                                        color:#444 !important;
+                                      "
+                                    >
+                                        <?php echo nl2br(
+                                            htmlspecialchars($r["comment"])
+                                        ); ?>
+                                    </p>
+
+                                </div>
+
+                            <?php endforeach; ?>
+
+                        </div>
+
+                    <?php else: ?>
+
+                        <div
+                          class="text-center py-5 text-muted"
+                          style="
+                            background-color:#fcf9f2;
+                            border-radius:8px;
+                          "
+                        >
+
+                            <i
+                              class="far fa-star fs-2 mb-3"
+                              style="
+                                color:#c8a165;
+                                opacity:0.6;
+                              "
+                            ></i>
+
+                            <p class="small mb-0">
+                                Chưa có đánh giá nào cho sản phẩm này.
+                            </p>
+
+                        </div>
+
+                    <?php endif; ?>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- CART DRAWER -->
+
+<aside
+  id="cartDrawer"
+  class="cart-drawer"
+  aria-label="Giỏ hàng"
+  aria-hidden="true"
+>
+
+    <div id="cartDrawerInner">
+
+        <div id="cartDrawerHeader">
+
+            <h2 id="cartDrawerTitle">
+                Giỏ Hàng Của Bạn
+            </h2>
+
+            <button
+              id="btnCloseCart"
+              aria-label="Đóng giỏ hàng"
+              style="
+                background:none;
+                border:none;
+                font-size:20px;
+              "
+            >
+                ✕
+            </button>
+
+        </div>
+
+
+        <div id="cartItemList"></div>
+
+
+        <div id="cartDrawerFooter">
+
+            <div
+              id="cartSubtotalRow"
+              class="d-flex justify-content-between mb-2"
+            >
+                <span>Tạm tính</span>
+                <span
+                  id="cartSubtotalAmount"
+                  class="fw-bold"
+                >
+                    3.450.000₫
+                </span>
+            </div>
+
+            <p
+              class="cart-tax-note text-muted"
+              style="font-size:12px;"
+            >
+                Phí vận chuyển và thuế sẽ được tính khi thanh toán.
+            </p>
+
+            <button
+              id="btnProceedToCheckout"
+              class="btn-primary btn-checkout w-100 py-2"
+            >
+                TIẾN HÀNH THANH TOÁN
+            </button>
+
+            <a
+              href="/index.php?page=gio_hang"
+              style="
+                display:block;
+                text-align:center;
+                margin-top:12px;
+                font-size:11px;
+                letter-spacing:1px;
+                color:#7a7670;
+                text-decoration:underline;
+                text-underline-offset:3px;
+              "
+            >
+                Xem giỏ hàng đầy đủ →
+            </a>
+
+        </div>
+
+    </div>
+
+</aside>
+
+<div id="cartOverlay" class="cart-overlay"></div>
+
+
+<!-- FOOTER -->
+
+<footer
+  class="pt-5 pb-3 border-top mt-5"
+  style="background-color:#fcf9f2;"
+>
+
+    <div class="container-fluid px-5">
+
+        <div class="row">
+
+            <div class="col-md-4 mb-4">
+
+                <h4
+                  class="fw-bold gold-text mb-3"
+                  style="
+                    font-family:'Times New Roman', serif;
+                  "
+                >
+                    LUMIÈRE
+                </h4>
+
+                <p class="text-muted small w-75">
+                    Điểm đến của những tuyệt tác trang sức thủ công.
+                    Kiến tạo vẻ đẹp vượt thời gian.
+                </p>
+
+                <p class="small text-muted mt-4">
+                    &copy; 2026 LUMIÈRE.
+                    Bản quyền thuộc về Nhóm 6.
+                </p>
+
+            </div>
+
+
+            <div class="col-md-2 mb-4">
+
+                <h6
+                  class="text-uppercase mb-3 fw-bold"
+                  style="font-size:12px;"
+                >
+                    Công Ty
+                </h6>
+
+                <ul class="list-unstyled text-muted small">
+
+                    <li class="mb-2">
+                        <a
+                          href="#"
+                          class="text-muted text-decoration-none"
+                        >
+                            Về Chúng Tôi
+                        </a>
+                    </li>
+
+                    <li class="mb-2">
+                        <a
+                          href="#"
+                          class="text-muted text-decoration-none"
+                        >
+                            Bộ Sưu Tập
+                        </a>
+                    </li>
+
+                    <li class="mb-2">
+                        <a
+                          href="#"
+                          class="text-muted text-decoration-none"
+                        >
+                            Tuyển Dụng
+                        </a>
+                    </li>
+
+                </ul>
+
+            </div>
+
+
+            <div class="col-md-3 mb-4">
+
+                <h6
+                  class="text-uppercase mb-3 fw-bold"
+                  style="font-size:12px;"
+                >
+                    Hỗ Trợ Khách Hàng
+                </h6>
+
+                <ul class="list-unstyled text-muted small">
+
+                    <li class="mb-2">
+                        <a
+                          href="#"
+                          class="text-muted text-decoration-none"
+                        >
+                            Giao Hàng & Đổi Trả
+                        </a>
+                    </li>
+
+                    <li class="mb-2">
+                        <a
+                          href="#"
+                          class="text-muted text-decoration-none"
+                        >
+                            Chính Sách Bảo Mật
+                        </a>
+                    </li>
+
+                    <li class="mb-2">
+                        <a
+                          href="#"
+                          class="text-muted text-decoration-none"
+                        >
+                            Liên Hệ
+                        </a>
+                    </li>
+
+                </ul>
+
+            </div>
+
+
+            <div class="col-md-3 mb-4">
+
+                <h6
+                  class="text-uppercase mb-3 fw-bold"
+                  style="font-size:12px;"
+                >
+                    Kết Nối
+                </h6>
+
+                <ul class="list-unstyled text-muted small">
+
+                    <li class="mb-2">
+                        <a
+                          href="#"
+                          class="text-muted text-decoration-none"
+                        >
+                            Facebook
+                        </a>
+                    </li>
+
+                    <li class="mb-2">
+                        <a
+                          href="#"
+                          class="text-muted text-decoration-none"
+                        >
+                            Instagram
+                        </a>
+                    </li>
+
+                    <li class="mb-2">
+                        <a
+                          href="#"
+                          class="text-muted text-decoration-none"
+                        >
+                            Pinterest
+                        </a>
+                    </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+<script>
+/* ================= CAROUSEL ================= */
+
+const allImages = [
+    {
+        src: '/<?php echo htmlspecialchars($product["main_image"]); ?>',
+        alt: '<?php echo addslashes($product["product_name"]); ?>'
+    },
+
+    <?php foreach ($extraImages as $img): ?>
+
+    {
+        src: '/<?php echo htmlspecialchars($img["image_url"]); ?>',
+        alt: '<?php echo addslashes($product["product_name"]); ?>'
+    },
+
+    <?php endforeach; ?>
+];
+
+let currentIndex = 0;
+
+const thumbnailStrip =
+    document.getElementById("thumbnailStrip");
+
+
+function slideCarousel(dir) {
+
+    if (allImages.length === 0) {
+        return;
+    }
+
+    currentIndex =
+        (currentIndex + dir + allImages.length) %
+        allImages.length;
+
+    goToSlide(currentIndex);
+}
+
+
+function goToSlide(index) {
+
+    if (
+        index < 0 ||
+        index >= allImages.length
+    ) {
+        return;
+    }
+
+    currentIndex = index;
+
+    const mainImg =
+        document.getElementById("mainProductImage");
+
+    mainImg.style.opacity = "0";
+
+    setTimeout(() => {
+
+        mainImg.src =
+            allImages[index].src;
+
+        mainImg.alt =
+            allImages[index].alt;
+
+        mainImg.style.opacity = "1";
+
+    }, 150);
+
+
+    document
+        .querySelectorAll(".thumb-btn")
+        .forEach((btn, i) => {
+
+            btn.classList.toggle(
+                "thumb-btn--active",
+                i === index
+            );
+
+        });
+}
+
+
+if (thumbnailStrip) {
+
+    thumbnailStrip.addEventListener(
+        "click",
+        (e) => {
+
+            const btn =
+                e.target.closest(".thumb-btn");
+
+            if (!btn) {
+                return;
+            }
+
+            const buttons =
+                thumbnailStrip.querySelectorAll(
+                    ".thumb-btn"
+                );
+
+            const idx =
+                [...buttons].indexOf(btn);
+
+            if (idx !== -1) {
+                goToSlide(idx);
+            }
+
+        }
+    );
+
+}
+
+
+if (allImages.length > 1) {
+
+    document.getElementById("prevBtn").style.display =
+        "flex";
+
+    document.getElementById("nextBtn").style.display =
+        "flex";
+
+}
+
+
+/* ================= SWIPE MOBILE ================= */
+
+let touchStartX = 0;
+
+const mainImageWrapper =
+    document.getElementById("mainImageWrapper");
+
+
+if (mainImageWrapper) {
+
+    mainImageWrapper.addEventListener(
+        "touchstart",
+        (e) => {
+            touchStartX =
+                e.touches[0].clientX;
+        }
+    );
+
+
+    mainImageWrapper.addEventListener(
+        "touchend",
+        (e) => {
+
+            const diff =
+                touchStartX -
+                e.changedTouches[0].clientX;
+
+            if (Math.abs(diff) > 50) {
+
+                slideCarousel(
+                    diff > 0 ? 1 : -1
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+/* ================= BUY NOW ================= */
+
+const btnBuyNow =
+    document.getElementById("btnBuyNow");
+
+
+if (btnBuyNow) {
+
+    btnBuyNow.addEventListener(
+        "click",
+        function(e) {
+
+            e.preventDefault();
+
+            const item = {
+
+                id: productDetail.id,
+
+                name: productDetail.name,
+
+                metal: productDetail.metal,
+
+                metalLabel:
+                    productDetail.metalLabels[
+                        productDetail.metal
+                    ],
+
+                price: productDetail.price,
+
+                image:
+                    document.getElementById(
+                        "mainProductImage"
+                    ).src,
+
+                quantity: 1
+
+            };
+
+
+            sessionStorage.setItem(
+                "checkout_items",
+                JSON.stringify([item])
+            );
+
+
+            window.location.href =
+                "/index.php?page=thanh_toan";
+
+        }
+    );
+
+}
+</script>
+
+
+<script>
+/* ================= PRODUCT DETAIL DATA ================= */
+
+const productDetail = {
+
+    id:
+        '<?php echo (int) $product["product_id"]; ?>',
+
+    name:
+        '<?php echo addslashes($product["product_name"]); ?>',
+
+    price:
+        <?php echo $product["sale_price"] > 0
+            ? $product["sale_price"]
+            : $product["price"]; ?>,
+
+    metal:
+        "default",
+
+    metalLabels: {
+        "default": "Mặc định"
+    },
+
+    images: {
+        main:
+            '/<?php echo htmlspecialchars($product["main_image"]); ?>'
+    }
+
+};
+</script>
+
+
+<script>
+/* ================= USER DROPDOWN ================= */
+
+function toggleUserDropdown(e) {
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const menu =
+        document.getElementById(
+            "userDropdownMenu"
+        );
+
+    menu.style.display =
+        menu.style.display === "none"
+            ? "block"
+            : "none";
+}
+
+
+document.addEventListener(
+    "click",
+    function(e) {
+
+        const wrapper =
+            document.getElementById(
+                "userDropdownWrapper"
+            );
+
+        if (
+            wrapper &&
+            !wrapper.contains(e.target)
+        ) {
+
+            document.getElementById(
+                "userDropdownMenu"
+            ).style.display = "none";
+
+        }
+
+    }
+);
+</script>
+
+
+<script>
+/* ================= REVIEW STAR INPUT ================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        const ratingInputs =
+            document.querySelectorAll(
+                'input[name="rating"]'
+            );
+
+        const stars =
+            document.querySelectorAll(
+                ".review-star"
+            );
+
+
+        function updateStars(value) {
+
+            stars.forEach(
+                function(star) {
+
+                    const rating =
+                        parseInt(
+                            star.dataset.rating
+                        );
+
+                    if (rating <= value) {
+
+                        star.classList.remove(
+                            "far"
+                        );
+
+                        star.classList.add(
+                            "fas"
+                        );
+
+                    } else {
+
+                        star.classList.remove(
+                            "fas"
+                        );
+
+                        star.classList.add(
+                            "far"
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        ratingInputs.forEach(
+            function(input) {
+
+                input.addEventListener(
+                    "change",
+                    function() {
+
+                        updateStars(
+                            parseInt(
+                                this.value
+                            )
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+        stars.forEach(
+            function(star) {
+
+                star.addEventListener(
+                    "mouseenter",
+                    function() {
+
+                        updateStars(
+                            parseInt(
+                                this.dataset.rating
+                            )
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+        const ratingContainer =
+            document.querySelector(
+                ".review-rating-input"
+            );
+
+
+        if (ratingContainer) {
+
+            ratingContainer.addEventListener(
+                "mouseleave",
+                function() {
+
+                    const checked =
+                        document.querySelector(
+                            'input[name="rating"]:checked'
+                        );
+
+                    if (checked) {
+
+                        updateStars(
+                            parseInt(
+                                checked.value
+                            )
+                        );
+
+                    } else {
+
+                        updateStars(0);
+
+                    }
+
+                }
+            );
+
+        }
+
+    }
+);
+</script>
+
+
+<script src="/assets/js/cart.js"></script>
+<script src="/assets/js/product_details.js"></script>
+<script src="/assets/js/chat.js"></script>
+
 </body>
 </html>

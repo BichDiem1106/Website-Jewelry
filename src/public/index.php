@@ -125,6 +125,12 @@ switch ($page) {
         $controller->showChiTiet($product_id);
         break;
 
+    case "submit_review":
+        require_once BASE_PATH . "/app/controllers/ProductController.php";
+        $controller = new ProductController();
+        $controller->submitReview();
+        break;
+
     case "don_hang":
         require_once BASE_PATH . "/app/controllers/HomeController.php";
         $controller = new HomeController();
