@@ -1,20 +1,49 @@
 const CART_KEY = "LUMIÈRE_cart";
-const IS_LOGGED_IN = window.USER_LOGGED_IN || window.IS_LOGGED_IN || false;
+
+function isUserLoggedIn() {
+  return window.USER_LOGGED_IN === true || window.IS_LOGGED_IN === true;
+}
 
 async function syncDB(action, data = {}) {
-  if (!IS_LOGGED_IN) return;
+  if (!isUserLoggedIn()) {
+    return {
+      status: "guest",
+    };
+  }
+
   try {
     const form = new FormData();
+
     form.append("action", action);
-    Object.entries(data).forEach(([k, v]) => {
-      if (v != null) form.append(k, v);
+
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) {
+        form.append(key, value);
+      }
     });
-    await fetch("/index.php?page=cart&action=" + action, {
-      method: "POST",
-      body: form,
-    });
-  } catch (e) {
-    console.warn("Cart sync lỗi:", e);
+
+    const response = await fetch(
+      "/index.php?page=cart&action=" + encodeURIComponent(action),
+      {
+        method: "POST",
+        body: form,
+      }
+    );
+
+    const result = await response.json();
+
+    if (result.status !== "ok") {
+      console.error("Lỗi đồng bộ giỏ hàng:", result);
+    }
+
+    return result;
+  } catch (error) {
+    console.error("Cart sync lỗi:", error);
+
+    return {
+      status: "error",
+      message: error.message,
+    };
   }
 }
 
@@ -22,66 +51,142 @@ const Cart = {
   getAll() {
     try {
       return JSON.parse(localStorage.getItem(CART_KEY)) || [];
-    } catch {
+    } catch (error) {
+      console.error("Không đọc được giỏ hàng:", error);
       return [];
     }
   },
+
   save(items) {
     localStorage.setItem(CART_KEY, JSON.stringify(items));
     window.dispatchEvent(new Event("cart-updated"));
   },
-  add(product) {
+
+  async add(product) {
     const items = this.getAll();
+
     const existing = items.find(
-      (i) => i.id === product.id && i.metal === product.metal,
+      (item) =>
+        String(item.id) === String(product.id) &&
+        item.metal === product.metal
     );
+
     if (existing) {
       existing.quantity += product.quantity || 1;
     } else {
-      items.push({ ...product, quantity: product.quantity || 1 });
+      items.push({
+        ...product,
+        quantity: product.quantity || 1,
+      });
     }
+
     this.save(items);
-    syncDB("add", {
+
+    const result = await syncDB("add", {
       product_id: product.id,
       quantity: product.quantity || 1,
-      selected_material: product.metal !== "default" ? product.metal : null,
+      selected_material:
+        product.metal !== "default" ? product.metal : null,
     });
-    return items;
+
+    return {
+      items,
+      result,
+    };
   },
-  remove(id, metal) {
+
+  async remove(id, metal) {
     const items = this.getAll().filter(
-      (i) => !(i.id === id && i.metal === metal),
+      (item) =>
+        !(
+          String(item.id) === String(id) &&
+          item.metal === metal
+        )
     );
+
     this.save(items);
-    syncDB("remove", { product_id: id });
+
+    await syncDB("remove", {
+      product_id: id,
+    });
+
     return items;
   },
-  updateQuantity(id, metal, delta) {
+
+  async updateQuantity(id, metal, delta) {
     const items = this.getAll();
-    const item = items.find((i) => i.id === id && i.metal === metal);
-    if (!item) return items;
+
+    const item = items.find(
+      (item) =>
+        String(item.id) === String(id) &&
+        item.metal === metal
+    );
+
+    if (!item) {
+      return items;
+    }
+
     item.quantity += delta;
-    if (item.quantity <= 0) return this.remove(id, metal);
+
+    if (item.quantity <= 0) {
+      return this.remove(id, metal);
+    }
+
     this.save(items);
-    syncDB("update", { product_id: id, quantity: item.quantity });
+
+    await syncDB("update", {
+      product_id: id,
+      quantity: item.quantity,
+    });
+
     return items;
   },
-  setQuantity(id, metal, qty) {
+
+  async setQuantity(id, metal, qty) {
     const items = this.getAll();
-    const item = items.find((i) => i.id === id && i.metal === metal);
-    if (!item) return items;
-    if (qty <= 0) return this.remove(id, metal);
+
+    const item = items.find(
+      (item) =>
+        String(item.id) === String(id) &&
+        item.metal === metal
+    );
+
+    if (!item) {
+      return items;
+    }
+
+    if (qty <= 0) {
+      return this.remove(id, metal);
+    }
+
     item.quantity = qty;
+
     this.save(items);
-    syncDB("update", { product_id: id, quantity: qty });
+
+    await syncDB("update", {
+      product_id: id,
+      quantity: qty,
+    });
+
     return items;
   },
+
   getTotalQty() {
-    return this.getAll().reduce((s, i) => s + i.quantity, 0);
+    return this.getAll().reduce(
+      (total, item) => total + Number(item.quantity || 0),
+      0
+    );
   },
+
   getTotalPrice() {
-    return this.getAll().reduce((s, i) => s + i.price * i.quantity, 0);
+    return this.getAll().reduce(
+      (total, item) =>
+        total +
+        Number(item.price || 0) * Number(item.quantity || 0),
+      0
+    );
   },
+
   clear() {
     this.save([]);
     syncDB("clear");
@@ -89,5 +194,5 @@ const Cart = {
 };
 
 function formatVND(amount) {
-  return amount.toLocaleString("vi-VN") + "₫";
+  return Number(amount || 0).toLocaleString("vi-VN") + "₫";
 }
