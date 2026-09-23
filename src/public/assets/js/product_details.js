@@ -87,25 +87,57 @@ function closeCartDrawer() {
 }
 
 // ── Thêm vào giỏ hàng ────────────────────────────────────────────────────────
-function addToCart() {
-  if (typeof window.USER_LOGGED_IN === "undefined" || !window.USER_LOGGED_IN) {
-    showToast("Vui lòng đăng nhập để thêm vào giỏ hàng.", "error");
+async function addToCart() {
+  if (
+    typeof window.USER_LOGGED_IN === "undefined" ||
+    window.USER_LOGGED_IN !== true
+  ) {
+    showToast("Vui lòng đăng nhập để thêm vào giỏ hàng.");
+
     setTimeout(() => {
-        window.location.href = "/index.php?page=login";
+      window.location.href = "/index.php?page=login";
     }, 1500);
+
     return;
   }
-  Cart.add({
+
+  const product = {
     id: productDetail.id,
     name: productDetail.name,
     metal: productDetail.metal,
-    metalLabel: productDetail.metalLabels[productDetail.metal],
+    metalLabel:
+      productDetail.metalLabels[productDetail.metal],
     price: productDetail.price,
-    image: mainProductImage ? mainProductImage.src : productDetail.images.main,
-  });
-  renderCartItems();
-  openCartDrawer();
-  showToast("Đã thêm vào giỏ hàng!");
+    image: mainProductImage
+      ? mainProductImage.src
+      : productDetail.images.main,
+    quantity: 1,
+  };
+
+  try {
+    const result = await Cart.add(product);
+
+    if (
+      result &&
+      result.result &&
+      result.result.status === "error"
+    ) {
+      console.error(
+        "Không thể lưu giỏ hàng:",
+        result.result
+      );
+
+      showToast("Không thể thêm sản phẩm vào giỏ hàng.");
+      return;
+    }
+
+    renderCartItems();
+    openCartDrawer();
+    showToast("Đã thêm sản phẩm vào giỏ hàng!");
+  } catch (error) {
+    console.error("Lỗi thêm giỏ hàng:", error);
+    showToast("Có lỗi xảy ra khi thêm vào giỏ hàng.");
+  }
 }
 
 // ── Gallery ───────────────────────────────────────────────────────────────────
