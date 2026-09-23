@@ -1623,25 +1623,25 @@
 <script>
 /* ================= CAROUSEL ================= */
 
-const allImages = [
-    {
-        src: '/<?php echo htmlspecialchars($product["main_image"]); ?>',
-        alt: '<?php echo addslashes($product["product_name"]); ?>'
-    },
-
-    <?php foreach ($extraImages as $img): ?>
-
-    {
-        src: '/<?php echo htmlspecialchars($img["image_url"]); ?>',
-        alt: '<?php echo addslashes($product["product_name"]); ?>'
-    },
-
-    <?php endforeach; ?>
-];
-
+const allImages = [ 
+    { 
+        src: '/<?php echo htmlspecialchars($product["main_image"]); ?>', 
+        alt: '<?php echo addslashes($product["product_name"]); ?>' 
+    }, 
+ 
+    <?php foreach ($extraImages as $img): ?> 
+ 
+    { 
+        src: '/<?php echo htmlspecialchars($img["image_url"]); ?>', 
+        alt: '<?php echo addslashes($product["product_name"]); ?>' 
+    }, 
+ 
+    <?php endforeach; ?> 
+]; 
+ 
 let currentIndex = 0;
 
-const thumbnailStrip =
+const carouselThumbnailStrip =
     document.getElementById("thumbnailStrip");
 
 
@@ -1701,9 +1701,9 @@ function goToSlide(index) {
 }
 
 
-if (thumbnailStrip) {
+if (carouselThumbnailStrip)  {
 
-    thumbnailStrip.addEventListener(
+    carouselThumbnailStrip.addEventListener(
         "click",
         (e) => {
 
@@ -1715,7 +1715,7 @@ if (thumbnailStrip) {
             }
 
             const buttons =
-                thumbnailStrip.querySelectorAll(
+                carouselThumbnailStrip.querySelectorAll(
                     ".thumb-btn"
                 );
 
